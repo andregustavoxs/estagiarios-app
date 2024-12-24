@@ -13,6 +13,9 @@ class Intern extends Model
 
     protected $fillable = [
         'name',
+        'email',
+        'phone',
+        'photo',
         'supervisor_id',
         'department_id',
     ];

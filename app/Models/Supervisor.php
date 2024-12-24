@@ -14,6 +14,7 @@ class Supervisor extends Model
 
     protected $fillable = [
         'name',
+        'photo',
     ];
 
     public function interns(): HasMany

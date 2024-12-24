@@ -26,6 +26,19 @@ class InternResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('email')
+                    ->email()
+                    ->required()
+                    ->unique(ignoreRecord: true)
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('phone')
+                    ->tel()
+                    ->maxLength(255),
+                Forms\Components\FileUpload::make('photo')
+                    ->image()
+                    ->directory('interns')
+                    ->imageEditor()
+                    ->circleCropper(),
                 Forms\Components\Select::make('supervisor_id')
                     ->relationship('supervisor', 'name')
                     ->required(),
@@ -40,6 +53,10 @@ class InternResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('email')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('phone')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('supervisor.name')
                     ->sortable()
