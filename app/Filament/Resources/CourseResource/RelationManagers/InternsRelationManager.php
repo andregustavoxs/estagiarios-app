@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Filament\Resources\SupervisorResource\RelationManagers;
+namespace App\Filament\Resources\CourseResource\RelationManagers;
 
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class InternsRelationManager extends RelationManager
 {
     protected static string $relationship = 'interns';
+
+    protected static ?string $recordTitleAttribute = 'name';
 
     protected static ?string $title = 'Estagiários';
 
@@ -28,9 +28,34 @@ class InternsRelationManager extends RelationManager
                     ->label('Nome')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('registration_number')
+                    ->label('Número de Matrícula')
+                    ->required()
+                    ->unique(ignoreRecord: true)
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('email')
+                    ->label('E-mail')
+                    ->email()
+                    ->required()
+                    ->unique(ignoreRecord: true)
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('phone')
+                    ->label('Telefone')
+                    ->tel()
+                    ->maxLength(255),
+                Forms\Components\FileUpload::make('photo')
+                    ->label('Foto')
+                    ->image()
+                    ->directory('interns')
+                    ->imageEditor()
+                    ->circleCropper(),
+                Forms\Components\Select::make('supervisor_id')
+                    ->label('Supervisor')
+                    ->relationship('supervisor', 'name')
+                    ->required(),
                 Forms\Components\Select::make('department_id')
+                    ->label('Departamento')
                     ->relationship('department', 'name')
-                    ->label('Setor')
                     ->required(),
             ]);
     }
@@ -42,17 +67,15 @@ class InternsRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('department.acronym')
-                    ->label('Setor')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Criado em')
-                    ->dateTime()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('supervisor.name')
+                    ->label('Supervisor')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('department.acronym')
+                    ->label('Departamento')
+                    ->sortable()
+                    ->searchable(),
             ])
             ->filters([
                 //

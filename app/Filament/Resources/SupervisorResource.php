@@ -17,16 +17,22 @@ class SupervisorResource extends Resource
 {
     protected static ?string $model = Supervisor::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-identification';
+
+    protected static ?string $modelLabel = 'Supervisor';
+    
+    protected static ?string $pluralModelLabel = 'Supervisores';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label('Nome')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\FileUpload::make('photo')
+                    ->label('Foto')
                     ->image()
                     ->directory('supervisors')
                     ->imageEditor()
@@ -39,15 +45,18 @@ class SupervisorResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->label('Nome')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('interns_count')
                     ->counts('interns')
-                    ->label('Number of Interns'),
+                    ->label('Número de Estagiários'),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label('Criado em')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
+                    ->label('Atualizado em')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

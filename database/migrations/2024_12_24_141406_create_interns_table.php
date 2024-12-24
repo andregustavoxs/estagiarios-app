@@ -14,11 +14,13 @@ return new class extends Migration
         Schema::create('interns', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('registration_number')->unique();
             $table->string('email')->unique();
             $table->string('phone')->nullable();
             $table->string('photo')->nullable();
-            $table->foreignId('supervisor_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('department_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('supervisor_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('department_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('course_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->timestamps();
         });
     }

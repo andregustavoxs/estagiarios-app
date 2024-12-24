@@ -13,7 +13,13 @@ class ListInterns extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('Novo Estagiário'),
         ];
+    }
+
+    public function getTitle(): string 
+    {
+        return 'Estagiários';
     }
 }

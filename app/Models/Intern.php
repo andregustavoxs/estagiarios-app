@@ -13,11 +13,13 @@ class Intern extends Model
 
     protected $fillable = [
         'name',
+        'registration_number',
         'email',
         'phone',
         'photo',
         'supervisor_id',
         'department_id',
+        'course_id',
     ];
 
     public function supervisor(): BelongsTo
@@ -28,5 +30,10 @@ class Intern extends Model
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
+    }
+
+    public function course(): BelongsTo
+    {
+        return $this->belongsTo(Course::class);
     }
 }

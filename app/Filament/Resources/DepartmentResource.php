@@ -17,14 +17,24 @@ class DepartmentResource extends Resource
 {
     protected static ?string $model = Department::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-building-office';
+    protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
+
+    protected static ?string $modelLabel = 'Setor';
+    
+    protected static ?string $pluralModelLabel = 'Setores';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label('Nome')
                     ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('acronym')
+                    ->label('Sigla')
+                    ->required()
+                    ->unique(ignoreRecord: true)
                     ->maxLength(255),
             ]);
     }
@@ -34,15 +44,21 @@ class DepartmentResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->label('Nome')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('acronym')
+                    ->label('Sigla')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('interns_count')
                     ->counts('interns')
-                    ->label('Number of Interns'),
+                    ->label('Número de Estagiários'),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label('Criado em')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
+                    ->label('Atualizado em')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

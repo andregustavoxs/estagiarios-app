@@ -13,7 +13,17 @@ class EditIntern extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+                ->label('Excluir'),
+            Actions\ForceDeleteAction::make()
+                ->label('Excluir Permanentemente'),
+            Actions\RestoreAction::make()
+                ->label('Restaurar'),
         ];
+    }
+
+    public function getTitle(): string 
+    {
+        return 'Editar Estagiário';
     }
 }

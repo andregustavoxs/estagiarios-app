@@ -14,6 +14,7 @@ class Department extends Model
 
     protected $fillable = [
         'name',
+        'acronym',
     ];
 
     public function interns(): HasMany
