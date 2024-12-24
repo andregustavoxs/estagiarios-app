@@ -14,10 +14,16 @@ class Intern extends Model
     protected $fillable = [
         'name',
         'supervisor_id',
+        'department_id',
     ];
 
     public function supervisor(): BelongsTo
     {
         return $this->belongsTo(Supervisor::class);
+    }
+
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
     }
 }

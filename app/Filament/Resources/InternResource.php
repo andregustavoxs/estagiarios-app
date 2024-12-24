@@ -29,6 +29,9 @@ class InternResource extends Resource
                 Forms\Components\Select::make('supervisor_id')
                     ->relationship('supervisor', 'name')
                     ->required(),
+                Forms\Components\Select::make('department_id')
+                    ->relationship('department', 'name')
+                    ->required(),
             ]);
     }
 
@@ -39,6 +42,9 @@ class InternResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('supervisor.name')
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('department.name')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
