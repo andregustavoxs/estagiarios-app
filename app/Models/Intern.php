@@ -20,6 +20,7 @@ class Intern extends Model
         'supervisor_id',
         'department_id',
         'course_id',
+        'internship_agency_id',
     ];
 
     public function supervisor(): BelongsTo
@@ -35,5 +36,10 @@ class Intern extends Model
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
+    }
+
+    public function internshipAgency(): BelongsTo
+    {
+        return $this->belongsTo(InternshipAgency::class);
     }
 }

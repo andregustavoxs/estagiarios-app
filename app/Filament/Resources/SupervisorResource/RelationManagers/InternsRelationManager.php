@@ -58,8 +58,7 @@ class InternsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make()
-                    ->label('Novo Estagiário'),
+                // Removed CreateAction
             ])
             ->actions([
                 Tables\Actions\EditAction::make()

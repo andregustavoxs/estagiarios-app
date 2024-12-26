@@ -74,7 +74,7 @@ class InternResource extends Resource
                             ]),
 
                         Forms\Components\Section::make('Informações Organizacionais')
-                            ->description('Detalhes do departamento e curso')
+                            ->description('Informações sobre vinculação do estagiário com supervisor, setor, curso e agente de integração')
                             ->columnSpan(3)
                             ->schema([
                                 Forms\Components\Grid::make(3)
@@ -94,6 +94,12 @@ class InternResource extends Resource
                                         Forms\Components\Select::make('course_id')
                                             ->label('Curso')
                                             ->relationship('course', 'name')
+                                            ->required()
+                                            ->searchable()
+                                            ->preload(),
+                                        Forms\Components\Select::make('internship_agency_id')
+                                            ->label('Agente de Integração')
+                                            ->relationship('internshipAgency', 'company_name')
                                             ->required()
                                             ->searchable()
                                             ->preload(),
@@ -120,6 +126,10 @@ class InternResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('supervisor.name')
                     ->label('Supervisor')
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('internshipAgency.company_name')
+                    ->label('Agente de Integração')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
