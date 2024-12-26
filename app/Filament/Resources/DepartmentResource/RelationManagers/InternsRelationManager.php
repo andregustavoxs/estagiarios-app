@@ -1,24 +1,20 @@
 <?php
 
-namespace App\Filament\Resources\SupervisorResource\RelationManagers;
+namespace App\Filament\Resources\DepartmentResource\RelationManagers;
 
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class InternsRelationManager extends RelationManager
 {
     protected static string $relationship = 'interns';
 
+    protected static ?string $recordTitleAttribute = 'name';
+
     protected static ?string $title = 'Estagiários';
-
-    protected static ?string $modelLabel = 'estagiário';
-
-    protected static ?string $pluralModelLabel = 'estagiários';
 
     public function form(Form $form): Form
     {
@@ -28,10 +24,39 @@ class InternsRelationManager extends RelationManager
                     ->label('Nome')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\Select::make('department_id')
-                    ->relationship('department', 'name')
-                    ->label('Setor')
-                    ->required(),
+                Forms\Components\TextInput::make('registration_number')
+                    ->label('Matrícula')
+                    ->required()
+                    ->unique(ignoreRecord: true)
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('email')
+                    ->label('E-mail')
+                    ->email()
+                    ->required()
+                    ->unique(ignoreRecord: true)
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('phone')
+                    ->label('Telefone')
+                    ->tel()
+                    ->maxLength(255),
+                Forms\Components\Select::make('supervisor_id')
+                    ->label('Supervisor')
+                    ->relationship('supervisor', 'name')
+                    ->required()
+                    ->searchable()
+                    ->preload(),
+                Forms\Components\Select::make('course_id')
+                    ->label('Curso')
+                    ->relationship('course', 'name')
+                    ->required()
+                    ->searchable()
+                    ->preload(),
+                Forms\Components\Select::make('internship_agency_id')
+                    ->label('Agente de Integração')
+                    ->relationship('internshipAgency', 'company_name')
+                    ->required()
+                    ->searchable()
+                    ->preload(),
             ]);
     }
 

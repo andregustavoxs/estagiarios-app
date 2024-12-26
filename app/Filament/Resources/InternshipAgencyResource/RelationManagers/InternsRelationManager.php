@@ -69,20 +69,16 @@ class InternsRelationManager extends RelationManager
                     ->label('Nome')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('registration_number')
-                    ->label('Matrícula')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('course.name')
-                    ->label('Curso')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('department.name')
+                Tables\Columns\TextColumn::make('department.acronym')
                     ->label('Setor')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('supervisor.name')
                     ->label('Supervisor')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('internshipAgency.company_name')
+                    ->label('Agente de Integração')
                     ->searchable()
                     ->sortable(),
             ])

@@ -16,10 +16,6 @@ class InternsRelationManager extends RelationManager
 
     protected static ?string $title = 'Estagiários';
 
-    protected static ?string $modelLabel = 'estagiário';
-
-    protected static ?string $pluralModelLabel = 'estagiários';
-
     public function form(Form $form): Form
     {
         return $form
@@ -29,7 +25,7 @@ class InternsRelationManager extends RelationManager
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('registration_number')
-                    ->label('Número de Matrícula')
+                    ->label('Matrícula')
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),
@@ -43,20 +39,24 @@ class InternsRelationManager extends RelationManager
                     ->label('Telefone')
                     ->tel()
                     ->maxLength(255),
-                Forms\Components\FileUpload::make('photo')
-                    ->label('Foto')
-                    ->image()
-                    ->directory('interns')
-                    ->imageEditor()
-                    ->circleCropper(),
                 Forms\Components\Select::make('supervisor_id')
                     ->label('Supervisor')
                     ->relationship('supervisor', 'name')
-                    ->required(),
+                    ->required()
+                    ->searchable()
+                    ->preload(),
                 Forms\Components\Select::make('department_id')
-                    ->label('Departamento')
+                    ->label('Setor')
                     ->relationship('department', 'name')
-                    ->required(),
+                    ->required()
+                    ->searchable()
+                    ->preload(),
+                Forms\Components\Select::make('internship_agency_id')
+                    ->label('Agente de Integração')
+                    ->relationship('internshipAgency', 'company_name')
+                    ->required()
+                    ->searchable()
+                    ->preload(),
             ]);
     }
 
@@ -67,15 +67,20 @@ class InternsRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('department.acronym')
+                    ->label('Setor')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('supervisor.name')
                     ->label('Supervisor')
-                    ->sortable()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('department.acronym')
-                    ->label('Departamento')
-                    ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('internshipAgency.company_name')
+                    ->label('Agente de Integração')
+                    ->searchable()
+                    ->sortable(),
             ])
             ->filters([
                 //
