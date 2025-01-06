@@ -7,6 +7,7 @@ use App\Filament\Resources\CourseResource\RelationManagers;
 use App\Models\Course;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -28,40 +29,65 @@ class CourseResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::sum('vacancies');
+        $totalVacancies = Course::sum('vacancies');
+        return "Total de Vagas: {$totalVacancies}";
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'success';
     }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('Nome')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('vacancies')
-                    ->label('Vagas')
-                    ->required()
-                    ->numeric()
-                    ->minValue(0)
-                    ->default(0)
-                    ->live()
-                    ->afterStateUpdated(function ($state, Get $get, Forms\Components\TextInput $component) {
-                        $record = $component->getRecord();
-                        
-                        if ($record) {
-                            $currentInterns = $record->interns()->count();
-                            
-                            if ($state < $currentInterns) {
-                                $component->state($record->vacancies);
-                                Notification::make()
-                                    ->danger()
-                                    ->title('Operação não permitida')
-                                    ->body("O número de vagas não pode ser reduzido para {$state}, pois já existem {$currentInterns} estagiários atribuídos a este curso.")
-                                    ->send();
-                            }
-                        }
-                    }),
+                Forms\Components\Section::make('Informações do Curso')
+                    ->description('Dados de identificação do curso')
+                    ->icon('heroicon-o-academic-cap')
+                    ->schema([
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('name')
+                                    ->label('Nome do Curso')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->placeholder('Digite o nome do curso')
+                                    ->helperText('Nome oficial do curso conforme registro')
+                                    ->prefixIcon('heroicon-o-academic-cap')
+                                    ->unique(ignoreRecord: true)
+                                    ->validationMessages([
+                                        'unique' => 'Este nome de curso já está em uso.',
+                                    ]),
+
+                                Forms\Components\TextInput::make('vacancies')
+                                    ->label('Total de Vagas')
+                                    ->required()
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->default(0)
+                                    ->placeholder('Número total de vagas')
+                                    ->helperText('Quantidade total de vagas disponíveis')
+                                    ->prefixIcon('heroicon-o-users')
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, Get $get, Forms\Components\TextInput $component) {
+                                        $record = $component->getRecord();
+                                        
+                                        if ($record) {
+                                            $currentInterns = $record->interns()->count();
+                                            
+                                            if ($state < $currentInterns) {
+                                                $component->state($record->vacancies);
+                                                Notification::make()
+                                                    ->danger()
+                                                    ->title('Operação não permitida')
+                                                    ->body("O número de vagas não pode ser reduzido para {$state}, pois já existem {$currentInterns} estagiários atribuídos a este curso.")
+                                                    ->send();
+                                            }
+                                        }
+                                    }),
+                            ]),
+                    ]),
             ]);
     }
 
@@ -71,25 +97,35 @@ class CourseResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('vacancies')
                     ->label('Total de Vagas')
-                    ->numeric(),
+                    ->numeric()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('vacancies_used')
                     ->label('Vagas Ocupadas')
-                    ->numeric(),
+                    ->numeric()
+                    ->getStateUsing(fn (Course $record): int => $record->interns()->count())
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('vacancies_available')
                     ->label('Vagas Disponíveis')
                     ->numeric()
-                    ->color(fn (Course $record): string => $record->vacancies_available > 0 ? 'success' : 'danger'),
+                    ->getStateUsing(fn (Course $record): int => $record->vacancies - $record->interns()->count())
+                    ->sortable()
+                    ->color(fn (Course $record): string => 
+                        ($record->vacancies - $record->interns()->count()) > 0 
+                            ? 'success' 
+                            : 'danger'
+                    ),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Criado em')
-                    ->dateTime()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Atualizado em')
-                    ->dateTime()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -100,6 +136,7 @@ class CourseResource extends Resource
                 Tables\Actions\EditAction::make()
                     ->label('Editar'),
                 Tables\Actions\DeleteAction::make()
+                    ->label('Excluir')
                     ->before(function ($action, Course $record) {
                         if ($record->interns()->count() > 0) {
                             Notification::make()
@@ -110,12 +147,12 @@ class CourseResource extends Resource
                             
                             $action->cancel();
                         }
-                    })
-                    ->label('Excluir'),
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
+                        ->label('Excluir selecionados')
                         ->before(function ($action, Collection $records) {
                             foreach ($records as $record) {
                                 if ($record->interns()->count() > 0) {
@@ -129,8 +166,7 @@ class CourseResource extends Resource
                                     return;
                                 }
                             }
-                        })
-                        ->label('Excluir selecionados'),
+                        }),
                 ]),
             ]);
     }

@@ -41,7 +41,10 @@ class DepartmentResource extends Resource
                                     ->placeholder('Digite o nome completo do setor')
                                     ->helperText('Nome oficial do setor')
                                     ->prefixIcon('heroicon-o-building-office')
-                                    ->columnSpanFull(),
+                                    ->unique(ignoreRecord: true)
+                                    ->validationMessages([
+                                        'unique' => 'Este nome de setor já está em uso.',
+                                    ]),
 
                                 Forms\Components\TextInput::make('acronym')
                                     ->label('Sigla')
@@ -50,8 +53,12 @@ class DepartmentResource extends Resource
                                     ->placeholder('Ex: RH, TI, ADM')
                                     ->helperText('Sigla ou abreviação do setor')
                                     ->prefixIcon('heroicon-o-identification')
-                                    ->formatStateUsing(fn (string $state): string => strtoupper($state))
-                                    ->dehydrateStateUsing(fn (string $state): string => strtoupper($state)),
+                                    ->formatStateUsing(fn (?string $state): string => $state ? strtoupper($state) : '')
+                                    ->dehydrateStateUsing(fn (?string $state): string => $state ? strtoupper($state) : '')
+                                    ->unique(ignoreRecord: true)
+                                    ->validationMessages([
+                                        'unique' => 'Esta sigla já está em uso.',
+                                    ]),
                             ]),
                     ]),
             ]);

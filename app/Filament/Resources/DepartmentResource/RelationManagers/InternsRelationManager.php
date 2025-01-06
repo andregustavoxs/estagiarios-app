@@ -20,43 +20,80 @@ class InternsRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('Nome')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('registration_number')
-                    ->label('Matrícula')
-                    ->required()
-                    ->unique(ignoreRecord: true)
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('email')
-                    ->label('E-mail')
-                    ->email()
-                    ->required()
-                    ->unique(ignoreRecord: true)
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('phone')
-                    ->label('Telefone')
-                    ->tel()
-                    ->maxLength(255),
-                Forms\Components\Select::make('supervisor_id')
-                    ->label('Supervisor')
-                    ->relationship('supervisor', 'name')
-                    ->required()
-                    ->searchable()
-                    ->preload(),
-                Forms\Components\Select::make('course_id')
-                    ->label('Curso')
-                    ->relationship('course', 'name')
-                    ->required()
-                    ->searchable()
-                    ->preload(),
-                Forms\Components\Select::make('internship_agency_id')
-                    ->label('Agente de Integração')
-                    ->relationship('internshipAgency', 'company_name')
-                    ->required()
-                    ->searchable()
-                    ->preload(),
+                Forms\Components\Section::make('Informações Pessoais')
+                    ->description('Dados pessoais do estagiário')
+                    ->icon('heroicon-o-user')
+                    ->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->label('Nome')
+                            ->required()
+                            ->maxLength(255)
+                            ->placeholder('Digite o nome completo')
+                            ->helperText('Nome completo do estagiário')
+                            ->prefixIcon('heroicon-o-user'),
+
+                        Forms\Components\TextInput::make('registration_number')
+                            ->label('Matrícula')
+                            ->required()
+                            ->maxLength(255)
+                            ->placeholder('Digite o número da matrícula')
+                            ->helperText('Número de matrícula do estagiário')
+                            ->prefixIcon('heroicon-o-identification')
+                            ->unique(ignoreRecord: true)
+                            ->validationMessages([
+                                'unique' => 'Esta matrícula já está em uso.',
+                            ]),
+
+                        Forms\Components\TextInput::make('email')
+                            ->label('E-mail')
+                            ->email()
+                            ->required()
+                            ->maxLength(255)
+                            ->placeholder('Digite o e-mail')
+                            ->helperText('E-mail institucional ou pessoal')
+                            ->prefixIcon('heroicon-o-envelope'),
+
+                        Forms\Components\TextInput::make('phone')
+                            ->label('Telefone')
+                            ->required()
+                            ->maxLength(20)
+                            ->mask('(99) 99999-9999')
+                            ->placeholder('(00) 00000-0000')
+                            ->helperText('Número de telefone celular')
+                            ->prefixIcon('heroicon-o-phone'),
+                    ]),
+
+                Forms\Components\Section::make('Informações do Estágio')
+                    ->description('Dados relacionados ao estágio')
+                    ->icon('heroicon-o-academic-cap')
+                    ->schema([
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\Select::make('course_id')
+                                    ->relationship('course', 'name')
+                                    ->label('Curso')
+                                    ->required()
+                                    ->placeholder('Selecione o curso')
+                                    ->helperText('Curso do estagiário')
+                                    ->prefixIcon('heroicon-o-academic-cap'),
+
+                                Forms\Components\Select::make('supervisor_id')
+                                    ->relationship('supervisor', 'name')
+                                    ->label('Supervisor')
+                                    ->required()
+                                    ->placeholder('Selecione o supervisor')
+                                    ->helperText('Supervisor responsável')
+                                    ->prefixIcon('heroicon-o-user'),
+
+                                Forms\Components\Select::make('internship_agency_id')
+                                    ->relationship('internshipAgency', 'company_name')
+                                    ->label('Agente de Integração')
+                                    ->required()
+                                    ->placeholder('Selecione o agente')
+                                    ->helperText('Agente de integração responsável')
+                                    ->prefixIcon('heroicon-o-building-library'),
+                            ]),
+                    ]),
             ]);
     }
 
@@ -89,6 +126,8 @@ class InternsRelationManager extends RelationManager
                 // Removed CreateAction
             ])
             ->actions([
+                Tables\Actions\ViewAction::make()
+                    ->label('Visualizar'),
                 Tables\Actions\EditAction::make()
                     ->label('Editar'),
                 Tables\Actions\DeleteAction::make()

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Intern extends Model
 {
@@ -41,5 +42,10 @@ class Intern extends Model
     public function internshipAgency(): BelongsTo
     {
         return $this->belongsTo(InternshipAgency::class);
+    }
+
+    public function dossier(): HasOne
+    {
+        return $this->hasOne(InternDossier::class);
     }
 }

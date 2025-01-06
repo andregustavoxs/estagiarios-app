@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('internship_agencies', function (Blueprint $table) {
             $table->id();
-            $table->string('cnpj');
-            $table->string('company_name');
-            $table->string('trade_name')->nullable();
+            $table->string('cnpj')->unique();
+            $table->string('company_name')->unique();
+            $table->string('trade_name')->unique();
             $table->string('phone');
             $table->string('contact_person')->nullable();
             $table->timestamps();

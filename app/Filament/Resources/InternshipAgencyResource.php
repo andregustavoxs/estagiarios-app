@@ -40,7 +40,11 @@ class InternshipAgencyResource extends Resource
                                     ->maxLength(255)
                                     ->placeholder('Digite a razão social da empresa')
                                     ->helperText('Nome oficial registrado da empresa')
-                                    ->prefixIcon('heroicon-o-building-library')
+                                    ->prefixIcon('heroicon-o-building-office')
+                                    ->unique(ignoreRecord: true)
+                                    ->validationMessages([
+                                        'unique' => 'Esta razão social já está em uso.',
+                                    ])
                                     ->columnSpanFull(),
 
                                 Forms\Components\TextInput::make('trade_name')
@@ -49,7 +53,11 @@ class InternshipAgencyResource extends Resource
                                     ->maxLength(255)
                                     ->placeholder('Digite o nome fantasia')
                                     ->helperText('Nome comercial ou marca da empresa')
-                                    ->prefixIcon('heroicon-o-building-storefront'),
+                                    ->prefixIcon('heroicon-o-building-storefront')
+                                    ->unique(ignoreRecord: true)
+                                    ->validationMessages([
+                                        'unique' => 'Este nome fantasia já está em uso.',
+                                    ]),
 
                                 Forms\Components\TextInput::make('cnpj')
                                     ->label('CNPJ')
@@ -58,7 +66,11 @@ class InternshipAgencyResource extends Resource
                                     ->mask('99.999.999/9999-99')
                                     ->placeholder('00.000.000/0000-00')
                                     ->helperText('CNPJ da empresa (apenas números)')
-                                    ->prefixIcon('heroicon-o-identification'),
+                                    ->prefixIcon('heroicon-o-identification')
+                                    ->unique(ignoreRecord: true)
+                                    ->validationMessages([
+                                        'unique' => 'Este CNPJ já está cadastrado.',
+                                    ]),
                             ]),
                     ]),
 

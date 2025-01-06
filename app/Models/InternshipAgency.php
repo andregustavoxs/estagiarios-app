@@ -12,11 +12,11 @@ class InternshipAgency extends Model
     use HasFactory;
 
     protected $fillable = [
-       'cnpj',
-       'company_name',
-       'trade_name',  
-       'phone',
-       'contact_person',
+        'cnpj',
+        'company_name',
+        'trade_name',
+        'phone',
+        'contact_person',
     ];
 
     public function interns(): HasMany

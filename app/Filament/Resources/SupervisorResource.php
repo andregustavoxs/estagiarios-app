@@ -45,6 +45,10 @@ class SupervisorResource extends Resource
                                     ->placeholder('Digite o nome completo do supervisor')
                                     ->helperText('Nome completo do supervisor')
                                     ->prefixIcon('heroicon-o-user')
+                                    ->unique(ignoreRecord: true)
+                                    ->validationMessages([
+                                        'unique' => 'Este nome de supervisor já está em uso.',
+                                    ])
                                     ->columnSpanFull(),
                             ]),
 

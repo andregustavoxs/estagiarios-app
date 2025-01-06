@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\InternResource\Pages;
 use App\Models\Course;
 use App\Models\Intern;
+use App\Filament\Resources\InternResource\RelationManagers;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -220,7 +221,7 @@ class InternResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\DossierRelationManager::class,
         ];
     }
     
