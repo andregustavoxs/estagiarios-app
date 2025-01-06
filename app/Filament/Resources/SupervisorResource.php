@@ -12,6 +12,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Collection;
 
 class SupervisorResource extends Resource
 {
@@ -44,6 +46,8 @@ class SupervisorResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ImageColumn::make('photo')
+                    ->label('Foto'),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
                     ->searchable(),
@@ -66,10 +70,36 @@ class SupervisorResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->before(function ($action, Supervisor $record) {
+                        if ($record->interns()->count() > 0) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Ação bloqueada')
+                                ->body('Não é possível excluir este supervisor pois existem estagiários vinculados a ele.')
+                                ->send();
+                            
+                            $action->cancel();
+                        }
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->before(function ($action, Collection $records) {
+                            foreach ($records as $record) {
+                                if ($record->interns()->count() > 0) {
+                                    Notification::make()
+                                        ->danger()
+                                        ->title('Ação bloqueada')
+                                        ->body('Não é possível excluir supervisores que possuem estagiários vinculados.')
+                                        ->send();
+                                    
+                                    $action->cancel();
+                                    return;
+                                }
+                            }
+                        }),
                 ]),
             ]);
     }

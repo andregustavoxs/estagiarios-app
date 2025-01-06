@@ -11,7 +11,8 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Database\Eloquent\Collection;
+use Filament\Notifications\Notification;
 
 class DepartmentResource extends Resource
 {
@@ -68,21 +69,47 @@ class DepartmentResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->before(function ($action, Department $record) {
+                        if ($record->interns()->count() > 0) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Ação bloqueada')
+                                ->body('Não é possível excluir este setor pois existem estagiários vinculados a ele.')
+                                ->send();
+                            
+                            $action->cancel();
+                        }
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->before(function ($action, Collection $records) {
+                            foreach ($records as $record) {
+                                if ($record->interns()->count() > 0) {
+                                    Notification::make()
+                                        ->danger()
+                                        ->title('Ação bloqueada')
+                                        ->body('Não é possível excluir setores que possuem estagiários vinculados.')
+                                        ->send();
+                                    
+                                    $action->cancel();
+                                    return;
+                                }
+                            }
+                        }),
                 ]),
             ]);
     }
-
+    
     public static function getRelations(): array
     {
         return [
             RelationManagers\InternsRelationManager::class,
         ];
     }
-
+    
     public static function getPages(): array
     {
         return [

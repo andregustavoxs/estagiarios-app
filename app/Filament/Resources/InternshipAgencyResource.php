@@ -11,7 +11,8 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Database\Eloquent\Collection;
+use Filament\Notifications\Notification;
 
 class InternshipAgencyResource extends Resource
 {
@@ -74,10 +75,36 @@ class InternshipAgencyResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->before(function ($action, InternshipAgency $record) {
+                        if ($record->interns()->count() > 0) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Ação bloqueada')
+                                ->body('Não é possível excluir este agente de integração pois existem estagiários vinculados a ele.')
+                                ->send();
+                            
+                            $action->cancel();
+                        }
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->before(function ($action, Collection $records) {
+                            foreach ($records as $record) {
+                                if ($record->interns()->count() > 0) {
+                                    Notification::make()
+                                        ->danger()
+                                        ->title('Ação bloqueada')
+                                        ->body('Não é possível excluir agentes de integração que possuem estagiários vinculados.')
+                                        ->send();
+                                    
+                                    $action->cancel();
+                                    return;
+                                }
+                            }
+                        }),
                 ]),
             ]);
     }
