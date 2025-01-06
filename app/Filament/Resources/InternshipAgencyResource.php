@@ -28,26 +28,64 @@ class InternshipAgencyResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('cnpj')
-                    ->required()
-                    ->maxLength(18)
-                    ->label('CNPJ'),
-                Forms\Components\TextInput::make('company_name')
-                    ->required()
-                    ->maxLength(255)
-                    ->label('Nome'),
-                Forms\Components\TextInput::make('trade_name')
-                    ->required()
-                    ->maxLength(255)
-                    ->label('Nome Fantasia'),
-                Forms\Components\TextInput::make('phone')
-                    ->required()
-                    ->maxLength(20)
-                    ->label('Telefone'),
-                Forms\Components\TextInput::make('contact_person')
-                    ->required()
-                    ->maxLength(255)
-                    ->label('Pessoa de Contato'),
+                Forms\Components\Section::make('Informações da Empresa')
+                    ->description('Dados cadastrais do agente de integração')
+                    ->icon('heroicon-o-building-office')
+                    ->schema([
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('company_name')
+                                    ->label('Razão Social')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->placeholder('Digite a razão social da empresa')
+                                    ->helperText('Nome oficial registrado da empresa')
+                                    ->prefixIcon('heroicon-o-building-library')
+                                    ->columnSpanFull(),
+
+                                Forms\Components\TextInput::make('trade_name')
+                                    ->label('Nome Fantasia')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->placeholder('Digite o nome fantasia')
+                                    ->helperText('Nome comercial ou marca da empresa')
+                                    ->prefixIcon('heroicon-o-building-storefront'),
+
+                                Forms\Components\TextInput::make('cnpj')
+                                    ->label('CNPJ')
+                                    ->required()
+                                    ->maxLength(18)
+                                    ->mask('99.999.999/9999-99')
+                                    ->placeholder('00.000.000/0000-00')
+                                    ->helperText('CNPJ da empresa (apenas números)')
+                                    ->prefixIcon('heroicon-o-identification'),
+                            ]),
+                    ]),
+
+                Forms\Components\Section::make('Informações de Contato')
+                    ->description('Dados para contato com o agente de integração')
+                    ->icon('heroicon-o-phone')
+                    ->schema([
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('phone')
+                                    ->label('Telefone')
+                                    ->required()
+                                    ->maxLength(20)
+                                    ->mask('(99) 99999-9999')
+                                    ->placeholder('(00) 00000-0000')
+                                    ->helperText('Telefone principal para contato')
+                                    ->prefixIcon('heroicon-o-phone'),
+
+                                Forms\Components\TextInput::make('contact_person')
+                                    ->label('Pessoa de Contato')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->placeholder('Nome da pessoa responsável')
+                                    ->helperText('Nome do responsável pelo contato')
+                                    ->prefixIcon('heroicon-o-user'),
+                            ]),
+                    ]),
             ]);
     }
 
@@ -56,17 +94,30 @@ class InternshipAgencyResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('company_name')
-                    ->label('Nome')
-                    ->searchable(),
+                    ->label('Razão Social')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('trade_name')
                     ->label('Nome Fantasia')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('cnpj')
+                    ->label('CNPJ')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('phone')
+                    ->label('Telefone')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('contact_person')
+                    ->label('Pessoa de Contato')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Criado em')
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->label('Atualizado em')
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])

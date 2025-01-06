@@ -19,7 +19,7 @@ class InternResource extends Resource
 {
     protected static ?string $model = Intern::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
 
     protected static ?string $modelLabel = 'Estagiário';
 
@@ -35,57 +35,76 @@ class InternResource extends Resource
                 ])
                     ->schema([
                         Forms\Components\Section::make('Informações Pessoais')
-                            ->description('Informações básicas do estagiário')
+                            ->description('Dados básicos do estagiário')
+                            ->icon('heroicon-o-user')
                             ->columnSpan(2)
                             ->schema([
                                 Forms\Components\TextInput::make('name')
-                                    ->label('Nome')
+                                    ->label('Nome Completo')
                                     ->required()
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->placeholder('Digite o nome completo do estagiário')
+                                    ->columnSpanFull(),
                                 Forms\Components\Grid::make(2)
                                     ->schema([
                                         Forms\Components\TextInput::make('registration_number')
                                             ->label('Matrícula')
                                             ->required()
                                             ->unique(ignoreRecord: true)
-                                            ->maxLength(255),
+                                            ->maxLength(255)
+                                            ->placeholder('Ex: 2025001')
+                                            ->helperText('Número de matrícula único do estagiário')
+                                            ->prefixIcon('heroicon-m-identification'),
                                         Forms\Components\TextInput::make('email')
                                             ->label('E-mail')
                                             ->email()
                                             ->required()
                                             ->unique(ignoreRecord: true)
-                                            ->maxLength(255),
+                                            ->maxLength(255)
+                                            ->placeholder('email@exemplo.com')
+                                            ->prefixIcon('heroicon-m-envelope'),
                                     ]),
                                 Forms\Components\TextInput::make('phone')
                                     ->label('Telefone')
                                     ->tel()
-                                    ->maxLength(255),
+                                    ->mask('(99) 99999-9999')
+                                    ->placeholder('(00) 00000-0000')
+                                    ->prefixIcon('heroicon-m-phone')
+                                    ->helperText('Número para contato com DDD'),
                             ]),
 
-                        Forms\Components\Section::make('Foto do Estagiário')
+                        Forms\Components\Section::make('Foto')
+                            ->description('Foto de identificação do estagiário')
+                            ->icon('heroicon-o-camera')
                             ->columnSpan(1)
                             ->schema([
                                 Forms\Components\FileUpload::make('photo')
+                                    ->label('Foto do Perfil')
                                     ->image()
                                     ->directory('interns')
                                     ->imageEditor()
                                     ->circleCropper()
                                     ->imageEditorAspectRatios([
                                         '1:1',
-                                    ]),
+                                    ])
+                                    ->helperText('Faça upload de uma foto de identificação')
+                                    ->columnSpanFull(),
                             ]),
 
-                        Forms\Components\Section::make('Informações Organizacionais')
-                            ->description('Informações sobre vinculação do estagiário com supervisor, setor, curso e agente de integração')
+                        Forms\Components\Section::make('Vinculação Institucional')
+                            ->description('Informações sobre a vinculação do estagiário')
+                            ->icon('heroicon-o-building-office-2')
                             ->columnSpan(3)
                             ->schema([
-                                Forms\Components\Grid::make(3)
+                                Forms\Components\Grid::make(2)
                                     ->schema([
                                         Forms\Components\Select::make('course_id')
                                             ->label('Curso')
                                             ->relationship('course', 'name')
                                             ->required()
                                             ->live()
+                                            ->searchable()
+                                            ->preload()
                                             ->afterStateUpdated(function ($state, Forms\Set $set) {
                                                 if ($state) {
                                                     $course = Course::find($state);
@@ -107,25 +126,39 @@ class InternResource extends Resource
                                                     $suffix = $available > 0 ? " ({$available} vagas disponíveis)" : " (Sem vagas)";
                                                     return [$course->id => $course->name . $suffix];
                                                 });
-                                            }),
+                                            })
+                                            ->helperText('Selecione o curso do estagiário')
+                                            ->prefixIcon('heroicon-m-academic-cap'),
+
                                         Forms\Components\Select::make('department_id')
                                             ->label('Setor')
                                             ->relationship('department', 'name')
                                             ->required()
                                             ->searchable()
-                                            ->preload(),
+                                            ->preload()
+                                            ->helperText('Setor onde o estágio será realizado')
+                                            ->prefixIcon('heroicon-m-building-office'),
+                                    ]),
+
+                                Forms\Components\Grid::make(2)
+                                    ->schema([
                                         Forms\Components\Select::make('supervisor_id')
                                             ->label('Supervisor')
                                             ->relationship('supervisor', 'name')
                                             ->required()
                                             ->searchable()
-                                            ->preload(),
+                                            ->preload()
+                                            ->helperText('Supervisor responsável pelo estagiário')
+                                            ->prefixIcon('heroicon-m-user-group'),
+
                                         Forms\Components\Select::make('internship_agency_id')
                                             ->label('Agente de Integração')
                                             ->relationship('internshipAgency', 'trade_name')
                                             ->required()
                                             ->searchable()
-                                            ->preload(),
+                                            ->preload()
+                                            ->helperText('Agente de integração responsável')
+                                            ->prefixIcon('heroicon-o-building-office'),
                                     ]),
                             ]),
                     ]),
@@ -136,9 +169,13 @@ class InternResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ImageColumn::make('photo')
+                    ->label('Foto')
+                    ->circular(),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('course.name')
                     ->label('Curso')
                     ->sortable()
@@ -157,12 +194,12 @@ class InternResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Criado em')
-                    ->dateTime()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Atualizado em')
-                    ->dateTime()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -170,24 +207,23 @@ class InternResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
-                    ->label('Editar'),
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
-                        ->label('Excluir selecionados'),
+                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
-
+    
     public static function getRelations(): array
     {
         return [
             //
         ];
     }
-
+    
     public static function getPages(): array
     {
         return [
@@ -196,7 +232,7 @@ class InternResource extends Resource
             'edit' => Pages\EditIntern::route('/{record}/edit'),
         ];
     }
-
+    
     public static function getNavigationLabel(): string
     {
         return 'Estagiários';

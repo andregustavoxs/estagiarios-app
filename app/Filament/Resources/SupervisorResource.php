@@ -11,15 +11,14 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Collection;
+use Filament\Notifications\Notification;
 
 class SupervisorResource extends Resource
 {
     protected static ?string $model = Supervisor::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-identification';
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
     protected static ?string $modelLabel = 'Supervisor';
     
@@ -29,16 +28,44 @@ class SupervisorResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('Nome')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\FileUpload::make('photo')
-                    ->label('Foto')
-                    ->image()
-                    ->directory('supervisors')
-                    ->imageEditor()
-                    ->circleCropper(),
+                Forms\Components\Grid::make([
+                    'default' => 1,
+                    'sm' => 3,
+                ])
+                    ->schema([
+                        Forms\Components\Section::make('Informações do Supervisor')
+                            ->description('Dados do supervisor')
+                            ->icon('heroicon-o-user')
+                            ->columnSpan(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('name')
+                                    ->label('Nome Completo')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->placeholder('Digite o nome completo do supervisor')
+                                    ->helperText('Nome completo do supervisor')
+                                    ->prefixIcon('heroicon-o-user')
+                                    ->columnSpanFull(),
+                            ]),
+
+                        Forms\Components\Section::make('Foto')
+                            ->description('Foto de identificação do supervisor')
+                            ->icon('heroicon-o-camera')
+                            ->columnSpan(1)
+                            ->schema([
+                                Forms\Components\FileUpload::make('photo')
+                                    ->label('Foto do Perfil')
+                                    ->image()
+                                    ->directory('supervisors')
+                                    ->imageEditor()
+                                    ->circleCropper()
+                                    ->imageEditorAspectRatios([
+                                        '1:1',
+                                    ])
+                                    ->helperText('Faça upload de uma foto de identificação')
+                                    ->columnSpanFull(),
+                            ]),
+                    ]),
             ]);
     }
 
@@ -47,21 +74,24 @@ class SupervisorResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('photo')
-                    ->label('Foto'),
+                    ->label('Foto')
+                    ->circular(),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('interns_count')
+                    ->label('Estagiários')
                     ->counts('interns')
-                    ->label('Número de Estagiários'),
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Criado em')
-                    ->dateTime()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Atualizado em')
-                    ->dateTime()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -103,14 +133,14 @@ class SupervisorResource extends Resource
                 ]),
             ]);
     }
-
+    
     public static function getRelations(): array
     {
         return [
             RelationManagers\InternsRelationManager::class,
         ];
     }
-
+    
     public static function getPages(): array
     {
         return [

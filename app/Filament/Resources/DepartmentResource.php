@@ -28,15 +28,32 @@ class DepartmentResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('Nome')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('acronym')
-                    ->label('Sigla')
-                    ->required()
-                    ->unique(ignoreRecord: true)
-                    ->maxLength(255),
+                Forms\Components\Section::make('Informações do Setor')
+                    ->description('Dados de identificação do setor')
+                    ->icon('heroicon-o-building-office-2')
+                    ->schema([
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('name')
+                                    ->label('Nome do Setor')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->placeholder('Digite o nome completo do setor')
+                                    ->helperText('Nome oficial do setor')
+                                    ->prefixIcon('heroicon-o-building-office')
+                                    ->columnSpanFull(),
+
+                                Forms\Components\TextInput::make('acronym')
+                                    ->label('Sigla')
+                                    ->required()
+                                    ->maxLength(10)
+                                    ->placeholder('Ex: RH, TI, ADM')
+                                    ->helperText('Sigla ou abreviação do setor')
+                                    ->prefixIcon('heroicon-o-identification')
+                                    ->formatStateUsing(fn (string $state): string => strtoupper($state))
+                                    ->dehydrateStateUsing(fn (string $state): string => strtoupper($state)),
+                            ]),
+                    ]),
             ]);
     }
 
@@ -46,21 +63,24 @@ class DepartmentResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('acronym')
                     ->label('Sigla')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('interns_count')
+                    ->label('Estagiários')
                     ->counts('interns')
-                    ->label('Número de Estagiários'),
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Criado em')
-                    ->dateTime()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Atualizado em')
-                    ->dateTime()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
