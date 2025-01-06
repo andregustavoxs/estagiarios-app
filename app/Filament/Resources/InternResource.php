@@ -3,13 +3,15 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\InternResource\Pages;
-use App\Filament\Resources\InternResource\RelationManagers;
+use App\Models\Course;
 use App\Models\Intern;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -79,27 +81,48 @@ class InternResource extends Resource
                             ->schema([
                                 Forms\Components\Grid::make(3)
                                     ->schema([
-                                        Forms\Components\Select::make('supervisor_id')
-                                            ->label('Supervisor')
-                                            ->relationship('supervisor', 'name')
+                                        Forms\Components\Select::make('course_id')
+                                            ->label('Curso')
+                                            ->relationship('course', 'name')
                                             ->required()
-                                            ->searchable()
-                                            ->preload(),
+                                            ->live()
+                                            ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                                if ($state) {
+                                                    $course = Course::find($state);
+                                                    if ($course && $course->vacancies_available <= 0) {
+                                                        Notification::make()
+                                                            ->danger()
+                                                            ->title('Sem Vagas Disponíveis')
+                                                            ->body("O curso '{$course->name}' atingiu o limite de vagas.")
+                                                            ->persistent()
+                                                            ->send();
+
+                                                        $set('course_id', null);
+                                                    }
+                                                }
+                                            })
+                                            ->options(function () {
+                                                return Course::all()->mapWithKeys(function ($course) {
+                                                    $available = $course->vacancies_available;
+                                                    $suffix = $available > 0 ? " ({$available} vagas disponíveis)" : " (Sem vagas)";
+                                                    return [$course->id => $course->name . $suffix];
+                                                });
+                                            }),
                                         Forms\Components\Select::make('department_id')
                                             ->label('Setor')
                                             ->relationship('department', 'name')
                                             ->required()
                                             ->searchable()
                                             ->preload(),
-                                        Forms\Components\Select::make('course_id')
-                                            ->label('Curso')
-                                            ->relationship('course', 'name')
+                                        Forms\Components\Select::make('supervisor_id')
+                                            ->label('Supervisor')
+                                            ->relationship('supervisor', 'name')
                                             ->required()
                                             ->searchable()
                                             ->preload(),
                                         Forms\Components\Select::make('internship_agency_id')
                                             ->label('Agente de Integração')
-                                            ->relationship('internshipAgency', 'company_name')
+                                            ->relationship('internshipAgency', 'trade_name')
                                             ->required()
                                             ->searchable()
                                             ->preload(),
@@ -128,7 +151,7 @@ class InternResource extends Resource
                     ->label('Supervisor')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('internshipAgency.company_name')
+                Tables\Columns\TextColumn::make('internshipAgency.trade_name')
                     ->label('Agente de Integração')
                     ->sortable()
                     ->searchable(),

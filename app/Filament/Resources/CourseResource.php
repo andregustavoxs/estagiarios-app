@@ -11,17 +11,25 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Database\Eloquent\Collection;
+use Filament\Notifications\Notification;
 
 class CourseResource extends Resource
 {
     protected static ?string $model = Course::class;
 
+    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+
+    protected static ?string $navigationLabel = 'Cursos';
+
     protected static ?string $modelLabel = 'Curso';
 
     protected static ?string $pluralModelLabel = 'Cursos';
 
-    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::sum('vacancies');
+    }
 
     public static function form(Form $form): Form
     {
@@ -31,6 +39,29 @@ class CourseResource extends Resource
                     ->label('Nome')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('vacancies')
+                    ->label('Vagas')
+                    ->required()
+                    ->numeric()
+                    ->minValue(0)
+                    ->default(0)
+                    ->live()
+                    ->afterStateUpdated(function ($state, Get $get, Forms\Components\TextInput $component) {
+                        $record = $component->getRecord();
+                        
+                        if ($record) {
+                            $currentInterns = $record->interns()->count();
+                            
+                            if ($state < $currentInterns) {
+                                $component->state($record->vacancies);
+                                Notification::make()
+                                    ->danger()
+                                    ->title('Operação não permitida')
+                                    ->body("O número de vagas não pode ser reduzido para {$state}, pois já existem {$currentInterns} estagiários atribuídos a este curso.")
+                                    ->send();
+                            }
+                        }
+                    }),
             ]);
     }
 
@@ -41,6 +72,16 @@ class CourseResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('vacancies')
+                    ->label('Total de Vagas')
+                    ->numeric(),
+                Tables\Columns\TextColumn::make('vacancies_used')
+                    ->label('Vagas Ocupadas')
+                    ->numeric(),
+                Tables\Columns\TextColumn::make('vacancies_available')
+                    ->label('Vagas Disponíveis')
+                    ->numeric()
+                    ->color(fn (Course $record): string => $record->vacancies_available > 0 ? 'success' : 'danger'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Criado em')
                     ->dateTime()
@@ -56,22 +97,51 @@ class CourseResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->label('Editar'),
+                Tables\Actions\DeleteAction::make()
+                    ->before(function ($action, Course $record) {
+                        if ($record->interns()->count() > 0) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Ação bloqueada')
+                                ->body('Não é possível excluir este curso pois existem estagiários vinculados a ele.')
+                                ->send();
+                            
+                            $action->cancel();
+                        }
+                    })
+                    ->label('Excluir'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->before(function ($action, Collection $records) {
+                            foreach ($records as $record) {
+                                if ($record->interns()->count() > 0) {
+                                    Notification::make()
+                                        ->danger()
+                                        ->title('Ação bloqueada')
+                                        ->body('Não é possível excluir cursos que possuem estagiários vinculados.')
+                                        ->send();
+                                    
+                                    $action->cancel();
+                                    return;
+                                }
+                            }
+                        })
+                        ->label('Excluir selecionados'),
                 ]),
             ]);
     }
-
+    
     public static function getRelations(): array
     {
         return [
             RelationManagers\InternsRelationManager::class,
         ];
     }
-
+    
     public static function getPages(): array
     {
         return [
@@ -79,5 +149,5 @@ class CourseResource extends Resource
             'create' => Pages\CreateCourse::route('/create'),
             'edit' => Pages\EditCourse::route('/{record}/edit'),
         ];
-    }
+    }    
 }

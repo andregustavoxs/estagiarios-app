@@ -55,7 +55,7 @@ class InternshipAgencyResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('company_name')
-                ->label('Nome')
+                    ->label('Nome')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('trade_name')
                     ->label('Nome Fantasia')

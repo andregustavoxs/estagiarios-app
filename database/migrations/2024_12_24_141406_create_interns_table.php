@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('photo')->nullable();
             $table->foreignId('supervisor_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('department_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('course_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('course_id')->constrained()->restrictOnDelete()->cascadeOnUpdate();
             $table->timestamps();
         });
     }

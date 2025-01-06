@@ -14,10 +14,21 @@ class Course extends Model
 
     protected $fillable = [
         'name',
+        'vacancies',
     ];
 
     public function interns(): HasMany
     {
         return $this->hasMany(Intern::class);
+    }
+
+    public function getVacanciesUsedAttribute(): int
+    {
+        return $this->interns()->count();
+    }
+
+    public function getVacanciesAvailableAttribute(): int
+    {
+        return max(0, $this->vacancies - $this->interns()->count());
     }
 }
