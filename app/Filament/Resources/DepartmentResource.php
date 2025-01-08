@@ -77,7 +77,7 @@ class DepartmentResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('interns_count')
-                    ->label('Estagiários')
+                    ->label('Quantidade de Estagiários')
                     ->counts('interns')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')

@@ -29,6 +29,6 @@ class Course extends Model
 
     public function getVacanciesAvailableAttribute(): int
     {
-        return max(0, $this->vacancies - $this->interns()->count());
+        return max(0, $this->vacancies - $this->vacancies_used);
     }
 }

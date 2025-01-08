@@ -177,35 +177,47 @@ class InternResource extends Resource
                     ->label('Nome')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('course.name')
-                    ->label('Curso')
-                    ->sortable()
-                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('department.acronym')
                     ->label('Setor')
-                    ->sortable()
-                    ->searchable(),
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('supervisor.name')
                     ->label('Supervisor')
-                    ->sortable()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('internshipAgency.trade_name')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('internshipAgency.company_name')
                     ->label('Agente de Integração')
-                    ->sortable()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Criado em')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Atualizado em')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
+
+                Tables\Columns\IconColumn::make('isCurrentlyOnVacation')
+                    ->label('Em Férias')
+                    ->boolean()
+                    ->state(fn ($record) => $record->isCurrentlyOnVacation())
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger')
+                    ->sortable(query: fn (Builder $query, string $direction) => $query->orderByVacationStatus($direction)),
             ])
             ->filters([
-                //
+                Tables\Filters\TernaryFilter::make('vacation_status')
+                    ->label('Status de Férias')
+                    ->placeholder('Todos os Estagiários')
+                    ->trueLabel('Em Férias')
+                    ->falseLabel('Não está em Férias')
+                    ->queries(
+                        true: fn (Builder $query) => $query->whereHas('vacations', function (Builder $query) {
+                            $today = now()->startOfDay();
+                            $query->where('start_date', '<=', $today)
+                                ->where('end_date', '>=', $today);
+                        }),
+                        false: fn (Builder $query) => $query->whereDoesntHave('vacations', function (Builder $query) {
+                            $today = now()->startOfDay();
+                            $query->where('start_date', '<=', $today)
+                                ->where('end_date', '>=', $today);
+                        }),
+                    ),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -221,7 +233,7 @@ class InternResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\DossierRelationManager::class,
+            RelationManagers\VacationsRelationManager::class,
         ];
     }
     
