@@ -2,39 +2,66 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Carbon\Carbon;
+use Illuminate\Validation\ValidationException;
 
 class InternVacation extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'intern_id',
         'start_date',
         'end_date',
+        'days_taken',
         'observation',
     ];
 
     protected $casts = [
-        'start_date' => 'date:Y-m-d',
-        'end_date' => 'date:Y-m-d',
+        'start_date' => 'date',
+        'end_date' => 'date',
+        'days_taken' => 'integer',
     ];
+
+    protected $appends = ['remaining_days_until_end', 'vacation_status'];
 
     public function intern(): BelongsTo
     {
         return $this->belongsTo(Intern::class);
     }
 
-    public function isCurrentlyOnVacation(): bool
+    protected static function booted(): void
     {
-        $today = Carbon::now()->startOfDay();
-        return $today->between(
-            Carbon::parse($this->start_date)->startOfDay(),
-            Carbon::parse($this->end_date)->endOfDay()
-        );
+        static::saving(function ($vacation) {
+            if ($vacation->start_date && $vacation->end_date) {
+                $vacation->days_taken = $vacation->start_date->diffInDays($vacation->end_date) + 1;
+                
+                // Check if the date range is valid
+                if ($vacation->end_date < $vacation->start_date) {
+                    throw ValidationException::withMessages([
+                        'end_date' => ['A data de término não pode ser anterior à data de início.'],
+                    ]);
+                }
+
+                // Calculate total days taken including this vacation
+                $totalDays = $vacation->intern->vacations()
+                    ->where('id', '!=', $vacation->id)
+                    ->sum('days_taken') + $vacation->days_taken;
+
+                if ($totalDays > 30) {
+                    throw ValidationException::withMessages([
+                        'end_date' => ['O total de dias de férias não pode exceder 30 dias. Dias restantes: ' . 
+                            (30 - ($totalDays - $vacation->days_taken)) . ' dias.'],
+                    ]);
+                }
+            }
+        });
     }
 
-    protected function setStartDateAttribute($value)
+    public function setStartDateAttribute($value)
     {
         if (is_string($value) && str_contains($value, '/')) {
             $parts = explode('/', $value);
@@ -46,7 +73,7 @@ class InternVacation extends Model
         $this->attributes['start_date'] = $value;
     }
 
-    protected function setEndDateAttribute($value)
+    public function setEndDateAttribute($value)
     {
         if (is_string($value) && str_contains($value, '/')) {
             $parts = explode('/', $value);
@@ -56,5 +83,59 @@ class InternVacation extends Model
             }
         }
         $this->attributes['end_date'] = $value;
+    }
+
+    public function isOverlapping(): bool
+    {
+        $query = static::where('intern_id', $this->intern_id)
+            ->where(function ($query) {
+                $query->whereBetween('start_date', [$this->start_date, $this->end_date])
+                    ->orWhereBetween('end_date', [$this->start_date, $this->end_date])
+                    ->orWhere(function ($query) {
+                        $query->where('start_date', '<=', $this->start_date)
+                            ->where('end_date', '>=', $this->end_date);
+                    });
+            });
+
+        // If this is an existing vacation (has an ID), exclude it from the check
+        if ($this->exists) {
+            $query->where('id', '!=', $this->id);
+        }
+
+        return $query->exists();
+    }
+
+    public function getRemainingDaysUntilEndAttribute(): ?int
+    {
+        if (!$this->isCurrentlyOnVacation()) {
+            return null;
+        }
+
+        return now()->startOfDay()->diffInDays($this->end_date) + 1;
+    }
+
+    public function getVacationStatusAttribute(): string
+    {
+        $today = now()->startOfDay();
+        
+        if ($today->isBefore($this->start_date)) {
+            return 'Férias futuras';
+        }
+        
+        if ($today->isAfter($this->end_date)) {
+            return 'Férias concluídas';
+        }
+        
+        $remainingDays = $this->remaining_days_until_end;
+        return "Em férias (Restam {$remainingDays} " . ($remainingDays > 1 ? 'dias' : 'dia') . ")";
+    }
+
+    public function isCurrentlyOnVacation(): bool
+    {
+        $today = now()->startOfDay();
+        return $today->between(
+            $this->start_date->startOfDay(),
+            $this->end_date->endOfDay()
+        );
     }
 }
