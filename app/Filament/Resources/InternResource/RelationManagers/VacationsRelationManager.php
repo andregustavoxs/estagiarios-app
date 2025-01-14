@@ -24,73 +24,99 @@ class VacationsRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\Grid::make(2)
+                Forms\Components\Section::make()
                     ->schema([
-                        Forms\Components\DatePicker::make('start_date')
-                            ->label('Data de Início')
-                            ->required()
-                            ->format('d/m/Y')
-                            ->displayFormat('d/m/Y')
-                            ->native(false)
-                            ->placeholder('dd/mm/aaaa')
-                            ->helperText('Data de início das férias')
-                            ->prefixIcon('heroicon-o-calendar')
-                            ->minDate(now()->startOfDay())
-                            ->validationMessages([
-                                'min' => 'A data de início deve ser hoje ou uma data futura.',
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\Select::make('period')
+                                    ->label('Período')
+                                    ->options([
+                                        1 => '1º Período',
+                                        2 => '2º Período',
+                                    ])
+                                    ->required()
+                                    ->native(false)
+                                    ->default(1)
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                        $totalDays = $this->ownerRecord->vacations()
+                                            ->where('period', $state)
+                                            ->sum('days_taken');
+                                        $set('available_days', 30 - $totalDays);
+                                    }),
+
+                                Forms\Components\TextInput::make('available_days')
+                                    ->label('Dias Disponíveis')
+                                    ->default(function () {
+                                        return 30 - $this->ownerRecord->vacations()
+                                            ->where('period', 1)
+                                            ->sum('days_taken');
+                                    })
+                                    ->disabled()
+                                    ->suffix('dias')
+                                    ->numeric(),
                             ]),
 
-                        Forms\Components\DatePicker::make('end_date')
-                            ->label('Data de Término')
-                            ->required()
-                            ->format('d/m/Y')
-                            ->displayFormat('d/m/Y')
-                            ->native(false)
-                            ->placeholder('dd/mm/aaaa')
-                            ->helperText('Data de término das férias')
-                            ->prefixIcon('heroicon-o-calendar')
-                            ->minDate(function (Forms\Get $get) {
-                                $startDate = $get('start_date');
-                                return $startDate ? $startDate : now()->startOfDay();
-                            })
-                            ->afterOrEqual('start_date')
-                            ->validationMessages([
-                                'after_or_equal' => 'A data de término deve ser posterior ou igual à data de início.',
-                            ]),
-                    ]),
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\DatePicker::make('start_date')
+                                    ->label('Data de Início')
+                                    ->required()
+                                    ->format('d/m/Y')
+                                    ->displayFormat('d/m/Y')
+                                    ->native(false)
+                                    ->placeholder('Selecione a data')
+                                    ->prefixIcon('heroicon-m-calendar')
+                                    ->minDate(now()->startOfDay())
+                                    ->closeOnDateSelection()
+                                    ->validationMessages([
+                                        'min' => 'A data de início deve ser hoje ou uma data futura.',
+                                    ]),
 
-                Forms\Components\Textarea::make('observation')
-                    ->label('Observação')
-                    ->maxLength(65535)
-                    ->columnSpanFull()
-                    ->placeholder('Digite alguma observação (opcional)')
-                    ->helperText('Observações adicionais sobre as férias'),
+                                Forms\Components\DatePicker::make('end_date')
+                                    ->label('Data de Término')
+                                    ->required()
+                                    ->format('d/m/Y')
+                                    ->displayFormat('d/m/Y')
+                                    ->native(false)
+                                    ->placeholder('Selecione a data')
+                                    ->prefixIcon('heroicon-m-calendar')
+                                    ->minDate(function (Forms\Get $get) {
+                                        $startDate = $get('start_date');
+                                        return $startDate ? $startDate : now()->startOfDay();
+                                    })
+                                    ->closeOnDateSelection()
+                                    ->afterOrEqual('start_date')
+                                    ->validationMessages([
+                                        'after_or_equal' => 'A data de término deve ser posterior ou igual à data de início.',
+                                    ]),
+                            ]),
+
+                        Forms\Components\Textarea::make('observation')
+                            ->label('Observação')
+                            ->placeholder('Digite alguma observação (opcional)')
+                            ->columnSpanFull()
+                            ->rows(3)
+                            ->maxLength(65535),
+                    ])
+                    ->columns(1),
             ]);
     }
 
     public function table(Table $table): Table
     {
-        $totalDaysTaken = $this->ownerRecord->vacations()->sum('days_taken');
-        $hasReachedLimit = $totalDaysTaken >= 30;
-
         return $table
-            ->heading('Férias (Limite: 30 dias)')
-            ->description($hasReachedLimit ? 'Limite de 30 dias de férias atingido.' : 'Gerencie os períodos de férias do estagiário.')
+            ->heading('Férias (Limite: 30 dias por período)')
+            ->description('Gerencie os períodos de férias do estagiário.')
             ->columns([
-                Tables\Columns\TextColumn::make('start_date')
-                    ->label('Data de Início')
-                    ->date('d/m/Y')
+                Tables\Columns\TextColumn::make('period')
+                    ->label('Período')
+                    ->formatStateUsing(fn (int $state): string => $state . 'º Período')
                     ->sortable(),
-
-                Tables\Columns\TextColumn::make('end_date')
-                    ->label('Data de Término')
-                    ->date('d/m/Y')
-                    ->sortable(),
-
                 Tables\Columns\TextColumn::make('days_taken')
                     ->label('Dias')
                     ->alignCenter(),
-
+                
                 Tables\Columns\TextColumn::make('vacation_status')
                     ->label('Status')
                     ->badge()
@@ -100,24 +126,25 @@ class VacationsRelationManager extends RelationManager
                         default => 'warning',
                     }),
 
-                Tables\Columns\TextColumn::make('observation')
-                    ->label('Observação')
-                    ->limit(50)
-                    ->tooltip(function ($record) {
-                        if (strlen($record->observation) > 50) {
-                            return $record->observation;
-                        }
-                        return null;
-                    }),
+                Tables\Columns\TextColumn::make('start_date')
+                    ->label('Data de Início')
+                    ->date('d/m/Y')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('end_date')
+                    ->label('Data de Término')
+                    ->date('d/m/Y')
+                    ->sortable(),
             ])
+            ->defaultSort('period', 'start_date')
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->label('Registrar Férias')
                     ->modalHeading('Registrar Férias')
-                    ->hidden(fn () => $this->ownerRecord->vacations()->sum('days_taken') >= 30)
                     ->mutateFormDataUsing(function (array $data): array {
                         $vacation = new InternVacation([
                             'intern_id' => $this->ownerRecord->id,
+                            'period' => $data['period'],
                             'start_date' => $data['start_date'],
                             'end_date' => $data['end_date'],
                         ]);
@@ -126,14 +153,19 @@ class VacationsRelationManager extends RelationManager
                         $daysForThisVacation = $vacation->start_date->diffInDays($vacation->end_date) + 1;
                         
                         // Calculate total days including this vacation
-                        $totalDays = $this->ownerRecord->vacations()->sum('days_taken') + $daysForThisVacation;
+                        $totalDays = $this->ownerRecord->vacations()
+                            ->where('period', $data['period'])
+                            ->sum('days_taken') + $daysForThisVacation;
 
                         if ($totalDays > 30) {
-                            $remainingDays = 30 - $this->ownerRecord->vacations()->sum('days_taken');
+                            $remainingDays = 30 - $this->ownerRecord->vacations()
+                                ->where('period', $data['period'])
+                                ->sum('days_taken');
+
                             Notification::make()
                                 ->danger()
                                 ->title('Erro ao registrar férias')
-                                ->body("Limite de dias excedido. Você tem apenas {$remainingDays} dias disponíveis para férias.")
+                                ->body("Limite de dias excedido para o {$data['period']}º período. Você tem apenas {$remainingDays} dias disponíveis para férias.")
                                 ->persistent()
                                 ->send();
 
@@ -144,7 +176,7 @@ class VacationsRelationManager extends RelationManager
                             Notification::make()
                                 ->danger()
                                 ->title('Erro ao registrar férias')
-                                ->body('Já existe um período de férias registrado para estas datas.')
+                                ->body('O estagiário já possui férias registradas para as datas de ' . $vacation->start_date->format('d/m/Y') . ' a ' . $vacation->end_date->format('d/m/Y') . '. Não é possível ter dois períodos de férias simultâneos.')
                                 ->persistent()
                                 ->send();
 
@@ -166,6 +198,7 @@ class VacationsRelationManager extends RelationManager
                     ->mutateFormDataUsing(function (InternVacation $record, array $data): array {
                         $vacation = new InternVacation([
                             'intern_id' => $this->ownerRecord->id,
+                            'period' => $data['period'],
                             'start_date' => $data['start_date'],
                             'end_date' => $data['end_date'],
                         ]);
@@ -177,18 +210,20 @@ class VacationsRelationManager extends RelationManager
                         
                         // Calculate total days including this vacation but excluding the current record
                         $totalDays = $this->ownerRecord->vacations()
+                            ->where('period', $data['period'])
                             ->where('id', '!=', $record->id)
                             ->sum('days_taken') + $daysForThisVacation;
 
                         if ($totalDays > 30) {
                             $remainingDays = 30 - ($this->ownerRecord->vacations()
+                                ->where('period', $data['period'])
                                 ->where('id', '!=', $record->id)
                                 ->sum('days_taken'));
                             
                             Notification::make()
                                 ->danger()
                                 ->title('Erro ao editar férias')
-                                ->body("Limite de dias excedido. Você tem apenas {$remainingDays} dias disponíveis para férias.")
+                                ->body("Limite de dias excedido para o {$data['period']}º período. Você tem apenas {$remainingDays} dias disponíveis para férias.")
                                 ->persistent()
                                 ->send();
 
@@ -199,7 +234,7 @@ class VacationsRelationManager extends RelationManager
                             Notification::make()
                                 ->danger()
                                 ->title('Erro ao editar férias')
-                                ->body('Já existe um período de férias registrado para estas datas.')
+                                ->body('O estagiário já possui férias registradas para as datas de ' . $vacation->start_date->format('d/m/Y') . ' a ' . $vacation->end_date->format('d/m/Y') . '. Não é possível ter dois períodos de férias simultâneos.')
                                 ->persistent()
                                 ->send();
 

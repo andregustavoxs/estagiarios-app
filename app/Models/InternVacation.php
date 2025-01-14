@@ -14,6 +14,7 @@ class InternVacation extends Model
 
     protected $fillable = [
         'intern_id',
+        'period',
         'start_date',
         'end_date',
         'days_taken',
@@ -24,9 +25,10 @@ class InternVacation extends Model
         'start_date' => 'date',
         'end_date' => 'date',
         'days_taken' => 'integer',
+        'period' => 'integer',
     ];
 
-    protected $appends = ['remaining_days_until_end', 'vacation_status'];
+    protected $appends = ['remaining_days_until_end', 'vacation_status', 'remaining_days_for_period'];
 
     public function intern(): BelongsTo
     {
@@ -49,11 +51,12 @@ class InternVacation extends Model
                 // Calculate total days taken including this vacation
                 $totalDays = $vacation->intern->vacations()
                     ->where('id', '!=', $vacation->id)
+                    ->where('period', $vacation->period)
                     ->sum('days_taken') + $vacation->days_taken;
 
                 if ($totalDays > 30) {
                     throw ValidationException::withMessages([
-                        'end_date' => ['O total de dias de férias não pode exceder 30 dias. Dias restantes: ' . 
+                        'end_date' => ['O total de dias de férias não pode exceder 30 dias para este período. Dias restantes: ' . 
                             (30 - ($totalDays - $vacation->days_taken)) . ' dias.'],
                     ]);
                 }
@@ -88,6 +91,7 @@ class InternVacation extends Model
     public function isOverlapping(): bool
     {
         $query = static::where('intern_id', $this->intern_id)
+            // Remove period check to validate overlaps across all periods
             ->where(function ($query) {
                 $query->whereBetween('start_date', [$this->start_date, $this->end_date])
                     ->orWhereBetween('end_date', [$this->start_date, $this->end_date])
@@ -137,5 +141,15 @@ class InternVacation extends Model
             $this->start_date->startOfDay(),
             $this->end_date->endOfDay()
         );
+    }
+
+    public function getRemainingDaysForPeriodAttribute(): int
+    {
+        $totalDaysTaken = $this->intern->vacations()
+            ->where('period', $this->period)
+            ->where('id', '!=', $this->id)
+            ->sum('days_taken');
+
+        return max(0, 30 - $totalDaysTaken);
     }
 }
