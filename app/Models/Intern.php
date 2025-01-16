@@ -16,7 +16,6 @@ class Intern extends Model
 
     protected $fillable = [
         'name',
-        'registration_number',
         'email',
         'phone',
         'photo',
@@ -46,23 +45,25 @@ class Intern extends Model
         return $this->belongsTo(InternshipAgency::class);
     }
 
-    public function vacations(): HasMany
+    public function internships(): HasMany
     {
-        return $this->hasMany(InternVacation::class);
+        return $this->hasMany(Internship::class);
     }
 
     public function scopeOrderByVacationStatus(Builder $query, string $direction): Builder
     {
-        $today = now()->startOfDay();
-        
-        return $query
-            ->leftJoin('intern_vacations', function ($join) use ($today) {
-                $join->on('interns.id', '=', 'intern_vacations.intern_id')
-                    ->where('intern_vacations.start_date', '<=', $today)
-                    ->where('intern_vacations.end_date', '>=', $today);
-            })
-            ->orderByRaw('CASE WHEN intern_vacations.id IS NOT NULL THEN 1 ELSE 0 END ' . $direction)
-            ->select('interns.*');
+        $today = now()->format('Y-m-d');
+
+        return $query->orderBy(function ($query) use ($today) {
+            return $query->selectRaw('EXISTS (
+                SELECT 1 
+                FROM internships i 
+                JOIN intern_vacations v ON v.internship_id = i.id 
+                WHERE i.intern_id = interns.id 
+                AND DATE(v.start_date) <= ? 
+                AND DATE(v.end_date) >= ?
+            )', [$today, $today]);
+        }, $direction);
     }
 
     public function scopeSearch(Builder $query, string $search): Builder
@@ -72,11 +73,10 @@ class Intern extends Model
 
     public function isCurrentlyOnVacation(): bool
     {
-        $today = now()->startOfDay();
-        return $this->vacations()
-            ->where(function ($query) use ($today) {
-                $query->whereDate('start_date', '<=', $today)
-                    ->whereDate('end_date', '>=', $today);
+        return $this->internships()
+            ->whereHas('vacations', function ($query) {
+                $query->whereDate('start_date', '<=', now())
+                    ->whereDate('end_date', '>=', now());
             })
             ->exists();
     }

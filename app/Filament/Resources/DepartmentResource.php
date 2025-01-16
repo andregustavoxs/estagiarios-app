@@ -71,9 +71,11 @@ class DepartmentResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
                     ->searchable()
+                    ->copyable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('acronym')
                     ->label('Sigla')
+                    ->copyable()
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('interns_count')

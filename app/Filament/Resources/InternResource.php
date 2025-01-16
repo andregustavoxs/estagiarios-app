@@ -3,28 +3,22 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\InternResource\Pages;
-use App\Models\Course;
-use App\Models\Intern;
 use App\Filament\Resources\InternResource\RelationManagers;
+use App\Models\Intern;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class InternResource extends Resource
 {
     protected static ?string $model = Intern::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
-
     protected static ?string $modelLabel = 'Estagiário';
-
     protected static ?string $pluralModelLabel = 'Estagiários';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
@@ -46,16 +40,9 @@ class InternResource extends Resource
                                     ->maxLength(255)
                                     ->placeholder('Digite o nome completo do estagiário')
                                     ->columnSpanFull(),
+
                                 Forms\Components\Grid::make(2)
                                     ->schema([
-                                        Forms\Components\TextInput::make('registration_number')
-                                            ->label('Matrícula')
-                                            ->required()
-                                            ->unique(ignoreRecord: true)
-                                            ->maxLength(255)
-                                            ->placeholder('Ex: 2025001')
-                                            ->helperText('Número de matrícula único do estagiário')
-                                            ->prefixIcon('heroicon-m-identification'),
                                         Forms\Components\TextInput::make('email')
                                             ->label('E-mail')
                                             ->email()
@@ -64,14 +51,15 @@ class InternResource extends Resource
                                             ->maxLength(255)
                                             ->placeholder('email@exemplo.com')
                                             ->prefixIcon('heroicon-m-envelope'),
+
+                                        Forms\Components\TextInput::make('phone')
+                                            ->label('Telefone')
+                                            ->tel()
+                                            ->mask('(99) 99999-9999')
+                                            ->placeholder('(00) 00000-0000')
+                                            ->prefixIcon('heroicon-m-phone')
+                                            ->helperText('Número para contato com DDD'),
                                     ]),
-                                Forms\Components\TextInput::make('phone')
-                                    ->label('Telefone')
-                                    ->tel()
-                                    ->mask('(99) 99999-9999')
-                                    ->placeholder('(00) 00000-0000')
-                                    ->prefixIcon('heroicon-m-phone')
-                                    ->helperText('Número para contato com DDD'),
                             ]),
 
                         Forms\Components\Section::make('Foto')
@@ -91,77 +79,6 @@ class InternResource extends Resource
                                     ->helperText('Faça upload de uma foto de identificação')
                                     ->columnSpanFull(),
                             ]),
-
-                        Forms\Components\Section::make('Vinculação Institucional')
-                            ->description('Informações sobre a vinculação do estagiário')
-                            ->icon('heroicon-o-building-office-2')
-                            ->columnSpan(3)
-                            ->schema([
-                                Forms\Components\Grid::make(2)
-                                    ->schema([
-                                        Forms\Components\Select::make('course_id')
-                                            ->label('Curso')
-                                            ->relationship('course', 'name')
-                                            ->required()
-                                            ->live()
-                                            ->searchable()
-                                            ->preload()
-                                            ->afterStateUpdated(function ($state, Forms\Set $set) {
-                                                if ($state) {
-                                                    $course = Course::find($state);
-                                                    if ($course && $course->vacancies_available <= 0) {
-                                                        Notification::make()
-                                                            ->danger()
-                                                            ->title('Sem Vagas Disponíveis')
-                                                            ->body("O curso '{$course->name}' atingiu o limite de vagas.")
-                                                            ->persistent()
-                                                            ->send();
-
-                                                        $set('course_id', null);
-                                                    }
-                                                }
-                                            })
-                                            ->options(function () {
-                                                return Course::all()->mapWithKeys(function ($course) {
-                                                    $available = $course->vacancies_available;
-                                                    $suffix = $available > 0 ? " ({$available} vagas disponíveis)" : " (Sem vagas)";
-                                                    return [$course->id => $course->name . $suffix];
-                                                });
-                                            })
-                                            ->helperText('Selecione o curso do estagiário')
-                                            ->prefixIcon('heroicon-m-academic-cap'),
-
-                                        Forms\Components\Select::make('department_id')
-                                            ->label('Setor')
-                                            ->relationship('department', 'name')
-                                            ->required()
-                                            ->searchable()
-                                            ->preload()
-                                            ->helperText('Setor onde o estágio será realizado')
-                                            ->prefixIcon('heroicon-m-building-office'),
-                                    ]),
-
-                                Forms\Components\Grid::make(2)
-                                    ->schema([
-                                        Forms\Components\Select::make('supervisor_id')
-                                            ->label('Supervisor')
-                                            ->relationship('supervisor', 'name')
-                                            ->required()
-                                            ->searchable()
-                                            ->preload()
-                                            ->helperText('Supervisor responsável pelo estagiário')
-                                            ->prefixIcon('heroicon-m-user-group'),
-
-                                        Forms\Components\Select::make('internship_agency_id')
-                                            ->label('Agente de Integração')
-                                            ->relationship('internshipAgency', 'trade_name')
-                                            ->required()
-                                            ->searchable()
-                                            ->preload()
-                                            ->helperText('Agente de integração responsável')
-                                            ->prefixIcon('heroicon-o-building-office'),
-                                    ]),
-                            ]),
                     ]),
             ]);
     }
@@ -172,34 +89,42 @@ class InternResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('photo')
                     ->label('Foto')
-                    ->circular(),
+                    ->circular()
+                    ->defaultImageUrl(function ($record) {
+                        return 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=FFFFFF&background=111827';
+                    }),
+
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
                     ->searchable()
-                    ->sortable(),
+                    ->copyable()
+                    ->sortable()
+                    ->weight('bold'),
 
-                Tables\Columns\TextColumn::make('department.acronym')
-                    ->label('Setor')
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('email')
+                    ->label('E-mail')
+                    ->searchable()
+                    ->sortable()
+                    ->copyable()
+                    ->copyMessage('E-mail copiado!')
+                    ->copyMessageDuration(1500),
 
-                Tables\Columns\TextColumn::make('supervisor.name')
-                    ->label('Supervisor')
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('phone')
+                    ->label('Telefone')
+                    ->copyable()
+                    ->searchable(),
 
-                Tables\Columns\TextColumn::make('internshipAgency.company_name')
-                    ->label('Agente de Integração')
-                    ->sortable(),
-
-                Tables\Columns\IconColumn::make('isCurrentlyOnVacation')
+                Tables\Columns\IconColumn::make('is_currently_on_vacation')
                     ->label('Em Férias')
                     ->boolean()
-                    ->state(fn ($record) => $record->isCurrentlyOnVacation())
+                    ->getStateUsing(fn (Intern $record): bool => $record->isCurrentlyOnVacation())
                     ->trueIcon('heroicon-o-check-circle')
                     ->falseIcon('heroicon-o-x-circle')
                     ->trueColor('success')
                     ->falseColor('danger')
-                    ->sortable(query: fn (Builder $query, string $direction) => $query->orderByVacationStatus($direction)),
+                    ->sortable(),
             ])
+            ->defaultSort('name')
             ->filters([
                 Tables\Filters\TernaryFilter::make('vacation_status')
                     ->label('Status de Férias')
@@ -207,20 +132,23 @@ class InternResource extends Resource
                     ->trueLabel('Em Férias')
                     ->falseLabel('Não está em Férias')
                     ->queries(
-                        true: fn (Builder $query) => $query->whereHas('vacations', function (Builder $query) {
-                            $today = now()->startOfDay();
-                            $query->where('start_date', '<=', $today)
-                                ->where('end_date', '>=', $today);
+                        true: fn (Builder $query) => $query->whereHas('internships', function (Builder $query) {
+                            $query->whereHas('vacations', function (Builder $query) {
+                                $query->whereDate('start_date', '<=', now())
+                                    ->whereDate('end_date', '>=', now());
+                            });
                         }),
-                        false: fn (Builder $query) => $query->whereDoesntHave('vacations', function (Builder $query) {
-                            $today = now()->startOfDay();
-                            $query->where('start_date', '<=', $today)
-                                ->where('end_date', '>=', $today);
+                        false: fn (Builder $query) => $query->whereDoesntHave('internships', function (Builder $query) {
+                            $query->whereHas('vacations', function (Builder $query) {
+                                $query->whereDate('start_date', '<=', now())
+                                    ->whereDate('end_date', '>=', now());
+                            });
                         }),
                     ),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->modalWidth('lg'),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
@@ -229,14 +157,14 @@ class InternResource extends Resource
                 ]),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
-            RelationManagers\VacationsRelationManager::class,
+            RelationManagers\InternshipsRelationManager::class,
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [
@@ -244,20 +172,5 @@ class InternResource extends Resource
             'create' => Pages\CreateIntern::route('/create'),
             'edit' => Pages\EditIntern::route('/{record}/edit'),
         ];
-    }
-    
-    public static function getNavigationLabel(): string
-    {
-        return 'Estagiários';
-    }
-
-    public static function getPluralModelLabel(): string
-    {
-        return 'Estagiários';
-    }
-
-    public static function getModelLabel(): string
-    {
-        return 'Estagiário';
     }
 }

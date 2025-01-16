@@ -98,6 +98,7 @@ class CourseResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
                     ->searchable()
+                    ->copyable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('vacancies')
                     ->label('Total de Vagas')

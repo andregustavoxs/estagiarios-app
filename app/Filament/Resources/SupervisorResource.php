@@ -79,10 +79,14 @@ class SupervisorResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('photo')
                     ->label('Foto')
-                    ->circular(),
+                    ->circular()
+                    ->defaultImageUrl(function ($record) {
+                        return 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=FFFFFF&background=111827';
+                    }),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
                     ->searchable()
+                    ->copyable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('interns_count')
                     ->label('Estagiários')

@@ -13,7 +13,7 @@ class InternVacation extends Model
     use HasFactory;
 
     protected $fillable = [
-        'intern_id',
+        'internship_id',
         'period',
         'start_date',
         'end_date',
@@ -30,9 +30,9 @@ class InternVacation extends Model
 
     protected $appends = ['remaining_days_until_end', 'vacation_status', 'remaining_days_for_period'];
 
-    public function intern(): BelongsTo
+    public function internship(): BelongsTo
     {
-        return $this->belongsTo(Intern::class);
+        return $this->belongsTo(Internship::class);
     }
 
     protected static function booted(): void
@@ -49,7 +49,7 @@ class InternVacation extends Model
                 }
 
                 // Calculate total days taken including this vacation
-                $totalDays = $vacation->intern->vacations()
+                $totalDays = $vacation->internship->vacations()
                     ->where('id', '!=', $vacation->id)
                     ->where('period', $vacation->period)
                     ->sum('days_taken') + $vacation->days_taken;
@@ -90,8 +90,7 @@ class InternVacation extends Model
 
     public function isOverlapping(): bool
     {
-        $query = static::where('intern_id', $this->intern_id)
-            // Remove period check to validate overlaps across all periods
+        $query = static::where('internship_id', $this->internship_id)
             ->where(function ($query) {
                 $query->whereBetween('start_date', [$this->start_date, $this->end_date])
                     ->orWhereBetween('end_date', [$this->start_date, $this->end_date])
@@ -145,7 +144,7 @@ class InternVacation extends Model
 
     public function getRemainingDaysForPeriodAttribute(): int
     {
-        $totalDaysTaken = $this->intern->vacations()
+        $totalDaysTaken = $this->internship->vacations()
             ->where('period', $this->period)
             ->where('id', '!=', $this->id)
             ->sum('days_taken');

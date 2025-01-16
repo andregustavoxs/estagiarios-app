@@ -107,21 +107,14 @@ class InternshipAgencyResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('company_name')
                     ->label('Razão Social')
+                    ->copyable()
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('trade_name')
                     ->label('Nome Fantasia')
                     ->searchable()
+                    ->copyable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('cnpj')
-                    ->label('CNPJ')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('phone')
-                    ->label('Telefone')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('contact_person')
-                    ->label('Pessoa de Contato')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Criado em')
                     ->dateTime('d/m/Y H:i')
