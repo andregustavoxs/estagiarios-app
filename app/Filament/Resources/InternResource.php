@@ -24,41 +24,50 @@ class InternResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Grid::make([
-                    'default' => 1,
-                    'sm' => 3,
-                ])
+                Forms\Components\Grid::make(3)
                     ->schema([
                         Forms\Components\Section::make('Informações Pessoais')
-                            ->description('Dados básicos do estagiário')
+                            ->description('Informações básicas do estagiário')
                             ->icon('heroicon-o-user')
                             ->columnSpan(2)
                             ->schema([
-                                Forms\Components\TextInput::make('name')
-                                    ->label('Nome Completo')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->placeholder('Digite o nome completo do estagiário')
-                                    ->columnSpanFull(),
-
                                 Forms\Components\Grid::make(2)
                                     ->schema([
+                                        Forms\Components\TextInput::make('name')
+                                            ->label('Nome')
+                                            ->required()
+                                            ->maxLength(255)
+                                            ->placeholder('Digite o nome completo')
+                                            ->prefixIcon('heroicon-m-user')
+                                            ->helperText('Nome completo do estagiário'),
+
                                         Forms\Components\TextInput::make('email')
                                             ->label('E-mail')
                                             ->email()
                                             ->required()
-                                            ->unique(ignoreRecord: true)
                                             ->maxLength(255)
-                                            ->placeholder('email@exemplo.com')
-                                            ->prefixIcon('heroicon-m-envelope'),
+                                            ->placeholder('exemplo@email.com')
+                                            ->prefixIcon('heroicon-m-envelope')
+                                            ->helperText('E-mail para contato'),
 
                                         Forms\Components\TextInput::make('phone')
                                             ->label('Telefone')
                                             ->tel()
+                                            ->maxLength(255)
                                             ->mask('(99) 99999-9999')
                                             ->placeholder('(00) 00000-0000')
                                             ->prefixIcon('heroicon-m-phone')
                                             ->helperText('Número para contato com DDD'),
+
+                                        Forms\Components\Select::make('status')
+                                            ->label('Status')
+                                            ->options([
+                                                'active' => 'Ativo',
+                                                'inactive' => 'Inativo',
+                                            ])
+                                            ->default('active')
+                                            ->helperText('Status do Estagiário')
+                                            ->required(),
                                     ]),
                             ]),
 
@@ -76,7 +85,6 @@ class InternResource extends Resource
                                     ->imageEditorAspectRatios([
                                         '1:1',
                                     ])
-                                    ->helperText('Faça upload de uma foto de identificação')
                                     ->columnSpanFull(),
                             ]),
                     ]),
@@ -91,7 +99,9 @@ class InternResource extends Resource
                     ->label('Foto')
                     ->circular()
                     ->defaultImageUrl(function ($record) {
-                        return 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=FFFFFF&background=111827';
+                        return 'https://ui-avatars.com/api/?name='.urlencode(
+                                $record->name
+                            ).'&color=FFFFFF&background=111827';
                     }),
 
                 Tables\Columns\TextColumn::make('name')
@@ -117,7 +127,7 @@ class InternResource extends Resource
                 Tables\Columns\IconColumn::make('is_currently_on_vacation')
                     ->label('Em Férias')
                     ->boolean()
-                    ->getStateUsing(fn (Intern $record): bool => $record->isCurrentlyOnVacation())
+                    ->getStateUsing(fn(Intern $record): bool => $record->isCurrentlyOnVacation())
                     ->trueIcon('heroicon-o-check-circle')
                     ->falseIcon('heroicon-o-x-circle')
                     ->trueColor('success')
@@ -126,19 +136,28 @@ class InternResource extends Resource
             ])
             ->defaultSort('name')
             ->filters([
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('Status')
+                    ->options([
+                        'active' => 'Ativo',
+                        'inactive' => 'Inativo',
+                    ])
+                    ->placeholder('Todos os Status')
+                    ->default('active'),
+
                 Tables\Filters\TernaryFilter::make('vacation_status')
                     ->label('Status de Férias')
                     ->placeholder('Todos os Estagiários')
                     ->trueLabel('Em Férias')
                     ->falseLabel('Não está em Férias')
                     ->queries(
-                        true: fn (Builder $query) => $query->whereHas('internships', function (Builder $query) {
+                        true: fn(Builder $query) => $query->whereHas('internships', function (Builder $query) {
                             $query->whereHas('vacations', function (Builder $query) {
                                 $query->whereDate('start_date', '<=', now())
                                     ->whereDate('end_date', '>=', now());
                             });
                         }),
-                        false: fn (Builder $query) => $query->whereDoesntHave('internships', function (Builder $query) {
+                        false: fn(Builder $query) => $query->whereDoesntHave('internships', function (Builder $query) {
                             $query->whereHas('vacations', function (Builder $query) {
                                 $query->whereDate('start_date', '<=', now())
                                     ->whereDate('end_date', '>=', now());

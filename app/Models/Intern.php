@@ -23,6 +23,11 @@ class Intern extends Model
         'department_id',
         'course_id',
         'internship_agency_id',
+        'status',
+    ];
+
+    protected $casts = [
+        'status' => 'string',
     ];
 
     public function supervisor(): BelongsTo
