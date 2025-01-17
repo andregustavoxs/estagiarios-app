@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Internship extends Model
 {
@@ -18,6 +19,13 @@ class Internship extends Model
         'supervisor_id',
         'course_id',
         'internship_agency_id',
+        'start_date',
+        'end_date',
+    ];
+
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
     ];
 
     public function intern(): BelongsTo
@@ -48,6 +56,11 @@ class Internship extends Model
     public function vacations(): HasMany
     {
         return $this->hasMany(InternVacation::class);
+    }
+
+    public function commitmentTerm(): HasOne
+    {
+        return $this->hasOne(CommitmentTerm::class);
     }
 
     public function hasActiveVacation(): bool

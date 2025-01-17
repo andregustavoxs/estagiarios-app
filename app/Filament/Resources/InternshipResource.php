@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\InternshipResource\Pages;
 use App\Filament\Resources\InternshipResource\RelationManagers;
 use App\Models\Course;
+use App\Models\CommitmentTerm;
 use App\Models\Internship;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -27,16 +28,28 @@ class InternshipResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Informações do Estagiário')
-                    ->description('Selecione o estagiário e defina seu número de matrícula')
+                Forms\Components\Section::make('Informações do Estágio')
+                    ->description('Informações básicas do estágio')
                     ->icon('heroicon-o-user')
                     ->schema([
                         Forms\Components\Select::make('intern_id')
                             ->relationship('intern', 'name')
+                            ->label('Estagiário')
                             ->required()
                             ->searchable()
                             ->preload()
-                            ->label('Estagiário')
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('name')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('email')
+                                    ->email()
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('phone')
+                                    ->tel()
+                                    ->maxLength(255),
+                            ])
                             ->helperText('Selecione o estagiário'),
 
                         Forms\Components\TextInput::make('registration_number')
@@ -46,12 +59,36 @@ class InternshipResource extends Resource
                             ->maxLength(255)
                             ->placeholder('Ex: 2025001')
                             ->helperText('Número de matrícula único do estagiário'),
+
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\DatePicker::make('start_date')
+                                    ->label('Data de Início')
+                                    ->helperText('Selecione a Data de Início do Estágio')
+                                    ->required()
+                                    ->native(false)
+                                    ->displayFormat('d/m/Y')
+                                    ->closeOnDateSelection()
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                        $set('end_date', null);
+                                    }),
+
+                                Forms\Components\DatePicker::make('end_date')
+                                    ->label('Data de Término')
+                                    ->required()
+                                    ->native(false)
+                                    ->displayFormat('d/m/Y')
+                                    ->closeOnDateSelection()
+                                    ->minDate(fn (Forms\Get $get) => $get('start_date'))
+                                    ->helperText('A data de término deve ser posterior à data de início'),
+                            ]),
                     ])
                     ->columns(2),
 
                 Forms\Components\Section::make('Vinculação Institucional')
-                    ->description('Informações sobre a vinculação do estagiário')
-                    ->icon('heroicon-o-building-office-2')
+                    ->description('Informações sobre o vínculo institucional do estágio')
+                    ->icon('heroicon-o-building-office')
                     ->schema([
                         Forms\Components\Select::make('course_id')
                             ->label('Curso')
@@ -119,36 +156,34 @@ class InternshipResource extends Resource
                 Tables\Columns\TextColumn::make('intern.name')
                     ->label('Estagiário')
                     ->searchable()
-                    ->copyable()
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('registration_number')
+                    ->label('Matrícula')
+                    ->searchable()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('department.name')
                     ->label('Setor')
-                    ->copyable()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('supervisor.name')
                     ->label('Supervisor')
-                    ->copyable()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('course.name')
                     ->label('Curso')
-                    ->copyable()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('internshipAgency.trade_name')
                     ->label('Agente de Integração')
-                    ->copyable()
                     ->sortable(),
             ])
-            ->defaultSort('intern.name')
             ->filters([
                 //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -161,6 +196,7 @@ class InternshipResource extends Resource
     {
         return [
             RelationManagers\VacationsRelationManager::class,
+            RelationManagers\CommitmentTermRelationManager::class,
         ];
     }
 
