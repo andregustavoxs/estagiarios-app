@@ -18,7 +18,6 @@ return new class extends Migration
 
             // Recreate the column as non-nullable with restrict on delete
             $table->foreignId('internship_agency_id')
-                ->after('course_id')
                 ->constrained('internship_agencies')
                 ->restrictOnDelete();
         });

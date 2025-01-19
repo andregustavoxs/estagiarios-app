@@ -2,19 +2,26 @@
 
 namespace App\Filament\Resources\InternshipAgencyResource\RelationManagers;
 
+use App\Models\Intern;
+use App\Models\Internship;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class InternsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'interns';
+    protected static string $relationship = 'internships';
 
-    protected static ?string $recordTitleAttribute = 'name';
+    protected static ?string $recordTitleAttribute = 'intern.name';
 
     protected static ?string $title = 'Estagiários';
+
+    protected static ?string $modelLabel = 'Estagiário';
+    
+    protected static ?string $pluralModelLabel = 'Estagiários';
 
     public function form(Form $form): Form
     {
@@ -24,43 +31,55 @@ class InternsRelationManager extends RelationManager
                     ->description('Dados pessoais do estagiário')
                     ->icon('heroicon-o-user')
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        Forms\Components\TextInput::make('intern.name')
                             ->label('Nome')
-                            ->required()
+                            ->disabled()
                             ->maxLength(255)
                             ->placeholder('Digite o nome completo')
                             ->helperText('Nome completo do estagiário')
-                            ->prefixIcon('heroicon-o-user'),
+                            ->prefixIcon('heroicon-o-user')
+                            ->afterStateHydrated(function ($component, $state, $record) {
+                                if ($record && $record->intern) {
+                                    $component->state($record->intern->name);
+                                }
+                            }),
 
                         Forms\Components\TextInput::make('registration_number')
                             ->label('Matrícula')
-                            ->required()
+                            ->disabled()
                             ->maxLength(255)
                             ->placeholder('Digite o número da matrícula')
                             ->helperText('Número de matrícula do estagiário')
-                            ->prefixIcon('heroicon-o-identification')
-                            ->unique(ignoreRecord: true)
-                            ->validationMessages([
-                                'unique' => 'Esta matrícula já está em uso.',
-                            ]),
+                            ->prefixIcon('heroicon-o-identification'),
 
-                        Forms\Components\TextInput::make('email')
+                        Forms\Components\TextInput::make('intern.email')
                             ->label('E-mail')
                             ->email()
-                            ->required()
+                            ->disabled()
                             ->maxLength(255)
                             ->placeholder('Digite o e-mail')
-                            ->helperText('E-mail institucional ou pessoal')
-                            ->prefixIcon('heroicon-o-envelope'),
+                            ->helperText('E-mail do estagiário')
+                            ->prefixIcon('heroicon-o-envelope')
+                            ->afterStateHydrated(function ($component, $state, $record) {
+                                if ($record && $record->intern) {
+                                    $component->state($record->intern->email);
+                                }
+                            }),
 
-                        Forms\Components\TextInput::make('phone')
+                        Forms\Components\TextInput::make('intern.phone')
                             ->label('Telefone')
-                            ->required()
+                            ->tel()
+                            ->disabled()
                             ->maxLength(20)
                             ->mask('(99) 99999-9999')
                             ->placeholder('(00) 00000-0000')
-                            ->helperText('Número de telefone celular')
-                            ->prefixIcon('heroicon-o-phone'),
+                            ->helperText('Telefone do estagiário')
+                            ->prefixIcon('heroicon-o-phone')
+                            ->afterStateHydrated(function ($component, $state, $record) {
+                                if ($record && $record->intern) {
+                                    $component->state($record->intern->phone);
+                                }
+                            }),
                     ]),
 
                 Forms\Components\Section::make('Informações do Estágio')
@@ -100,22 +119,23 @@ class InternsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('name')
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('intern'))
+            ->recordTitleAttribute('intern.name')
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                Tables\Columns\TextColumn::make('intern.name')
                     ->label('Nome')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('department.acronym')
-                    ->label('Setor')
+                Tables\Columns\TextColumn::make('registration_number')
+                    ->label('Matrícula')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('supervisor.name')
-                    ->label('Supervisor')
+                Tables\Columns\TextColumn::make('intern.email')
+                    ->label('E-mail')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('internshipAgency.trade_name')
-                    ->label('Agente de Integração')
+                Tables\Columns\TextColumn::make('intern.phone')
+                    ->label('Telefone')
                     ->searchable()
                     ->sortable(),
             ])
@@ -123,15 +143,10 @@ class InternsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                // Removed CreateAction
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
                     ->label('Visualizar'),
-                Tables\Actions\EditAction::make()
-                    ->label('Editar'),
-                Tables\Actions\DeleteAction::make()
-                    ->label('Excluir'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

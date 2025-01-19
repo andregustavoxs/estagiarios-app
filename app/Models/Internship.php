@@ -12,12 +12,14 @@ class Internship extends Model
 {
     use HasFactory;
 
+    protected $with = ['intern'];
+
     protected $fillable = [
-        'intern_id',
         'registration_number',
+        'intern_id',
+        'course_id',
         'department_id',
         'supervisor_id',
-        'course_id',
         'internship_agency_id',
         'start_date',
         'end_date',
@@ -33,6 +35,11 @@ class Internship extends Model
         return $this->belongsTo(Intern::class);
     }
 
+    public function course(): BelongsTo
+    {
+        return $this->belongsTo(Course::class);
+    }
+
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
@@ -41,11 +48,6 @@ class Internship extends Model
     public function supervisor(): BelongsTo
     {
         return $this->belongsTo(Supervisor::class);
-    }
-
-    public function course(): BelongsTo
-    {
-        return $this->belongsTo(Course::class);
     }
 
     public function internshipAgency(): BelongsTo

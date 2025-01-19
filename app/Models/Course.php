@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Intern;
+use App\Models\Internship;
 
 class Course extends Model
 {
@@ -19,7 +19,7 @@ class Course extends Model
 
     public function interns(): HasMany
     {
-        return $this->hasMany(Intern::class);
+        return $this->hasMany(Internship::class);
     }
 
     public function getVacanciesUsedAttribute(): int

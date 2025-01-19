@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::table('interns', function (Blueprint $table) {
             $table->foreignId('internship_agency_id')
-                ->after('course_id')
                 ->constrained('internship_agencies')
                 ->restrictOnDelete();
         });

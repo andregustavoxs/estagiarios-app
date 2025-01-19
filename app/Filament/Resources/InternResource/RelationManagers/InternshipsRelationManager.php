@@ -11,9 +11,12 @@ use Filament\Tables\Table;
 class InternshipsRelationManager extends RelationManager
 {
     protected static string $relationship = 'internships';
+
     protected static ?string $title = 'Estágios';
-    protected static ?string $modelLabel = 'Estágio';
-    protected static ?string $pluralModelLabel = 'Estágios';
+
+    protected static ?string $modelLabel = 'Estágios';
+
+    protected static ?string $pluralModelLabel = 'Estagiários';
 
     public function form(Form $form): Form
     {
@@ -83,11 +86,11 @@ class InternshipsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ViewAction::make()
+                    ->label('Visualizar')
+                    ->modalHeading('Visualizar Estágio'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

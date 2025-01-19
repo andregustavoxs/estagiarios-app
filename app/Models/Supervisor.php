@@ -5,7 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Intern;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Internship;
+use App\Models\Department;
 
 class Supervisor extends Model
 {
@@ -19,6 +21,6 @@ class Supervisor extends Model
 
     public function interns(): HasMany
     {
-        return $this->hasMany(Intern::class);
+        return $this->hasMany(Internship::class);
     }
 }

@@ -38,18 +38,6 @@ class InternshipResource extends Resource
                             ->required()
                             ->searchable()
                             ->preload()
-                            ->createOptionForm([
-                                Forms\Components\TextInput::make('name')
-                                    ->required()
-                                    ->maxLength(255),
-                                Forms\Components\TextInput::make('email')
-                                    ->email()
-                                    ->required()
-                                    ->maxLength(255),
-                                Forms\Components\TextInput::make('phone')
-                                    ->tel()
-                                    ->maxLength(255),
-                            ])
                             ->helperText('Selecione o estagiário'),
 
                         Forms\Components\TextInput::make('registration_number')
@@ -158,12 +146,7 @@ class InternshipResource extends Resource
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('registration_number')
-                    ->label('Matrícula')
-                    ->searchable()
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('department.name')
+                Tables\Columns\TextColumn::make('department.acronym')
                     ->label('Setor')
                     ->sortable(),
 
