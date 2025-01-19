@@ -35,7 +35,7 @@ class CourseResource extends Resource
 
     public static function getNavigationBadgeColor(): ?string
     {
-        return 'success';
+        return 'primary';
     }
 
     public static function form(Form $form): Form

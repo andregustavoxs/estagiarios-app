@@ -28,8 +28,42 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => [
+                    50 => '244, 253, 244',  // #f4fdf4
+                    100 => '230, 240, 247',
+                    200 => '190, 210, 230',
+                    300 => '150, 180, 213',
+                    400 => '110, 150, 196',
+                    500 => '44, 115, 169',   // #2c73a9
+                    600 => '35, 92, 135',
+                    700 => '26, 69, 101',
+                    800 => '17, 46, 67',
+                    900 => '8, 23, 33',
+                    950 => '4, 11, 16',
+                ],
+                'danger' => [
+                    50 => '254, 242, 242',
+                    100 => '254, 226, 226',
+                    200 => '254, 202, 202',
+                    300 => '252, 165, 165',
+                    400 => '239, 28, 41',     // #ef1c29
+                    500 => '239, 28, 41',     // #ef1c29
+                    600 => '220, 38, 38',
+                    700 => '185, 28, 28',
+                    800 => '153, 27, 27',
+                    900 => '127, 29, 29',
+                    950 => '69, 10, 10',
+                ],
             ])
+            ->brandName('TCE-MA')
+            ->brandLogo(asset('images/logo.png'))
+            ->brandLogoHeight('4rem')
+            ->navigationGroups([
+                'Estagiários',
+                'Configurações',
+            ])
+            ->sidebarCollapsibleOnDesktop()
+            ->maxContentWidth('full')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
@@ -37,8 +71,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                \App\Filament\Widgets\StatsOverview::class,
+                \App\Filament\Widgets\ActiveInternsTable::class,
+                \App\Filament\Widgets\CoursesNearLimitTable::class,
+                \App\Filament\Widgets\InternsOnVacationTable::class,
             ])
             ->middleware([
                 EncryptCookies::class,
