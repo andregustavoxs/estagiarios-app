@@ -17,13 +17,9 @@ class StatsOverview extends BaseWidget
     {
         // Get active interns count
         $activeInternsCount = Intern::where('status', 'active')->count();
-        
+
         // Get courses close to limit
-        $coursesNearLimit = Course::whereRaw('(
-            SELECT COUNT(*) 
-            FROM internships 
-            WHERE internships.course_id = courses.id
-        ) >= courses.vacancies * 0.8')->count();
+        $coursesNearLimit = Course::nearLimit()->count();
 
         // Get interns on vacation
         $internsOnVacation = Intern::whereHas('internships', function ($query) {
@@ -36,21 +32,24 @@ class StatsOverview extends BaseWidget
         return [
             Stat::make('Estagiários Ativos', $activeInternsCount)
                 ->description('Total de estagiários atualmente ativos')
-                ->descriptionIcon('heroicon-m-user-group')
+                ->descriptionIcon('heroicon-m-users')
                 ->color('success')
-                ->chart([7, 3, 4, 5, 6, $activeInternsCount]),
+                ->chart([7, 3, 4, 5, 6, $activeInternsCount])
+                ->icon('heroicon-m-user-circle'),
 
             Stat::make('Cursos Próximos do Limite', $coursesNearLimit)
-                ->description('Cursos com 80% ou mais das vagas preenchidas')
-                ->descriptionIcon('heroicon-m-academic-cap')
+                ->description('Cursos com 50% ou mais das vagas preenchidas')
+                ->descriptionIcon('heroicon-m-chart-bar')
                 ->color('warning')
-                ->chart([2, 3, 3, 4, 3, $coursesNearLimit]),
+                ->chart([2, 3, 3, 4, 3, $coursesNearLimit])
+                ->icon('heroicon-m-academic-cap'),
 
             Stat::make('Estagiários de Férias', $internsOnVacation)
                 ->description('Estagiários atualmente de férias')
-                ->descriptionIcon('heroicon-m-calendar')
-                ->color('info')
-                ->chart([1, 2, 2, 1, 3, $internsOnVacation]),
+                ->descriptionIcon('heroicon-m-calendar-days')
+                ->color('primary')
+                ->chart([3, 2, 2, 1, 3, $internsOnVacation])
+                ->icon('heroicon-m-sun'),
         ];
     }
 }

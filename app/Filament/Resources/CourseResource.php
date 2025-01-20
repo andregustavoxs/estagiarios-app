@@ -98,38 +98,40 @@ class CourseResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
                     ->searchable()
-                    ->copyable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold')
+                    ->icon('heroicon-m-academic-cap'),
                 Tables\Columns\TextColumn::make('vacancies')
                     ->label('Total de Vagas')
-                    ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->icon('heroicon-m-squares-plus'),
                 Tables\Columns\TextColumn::make('vacancies_used')
                     ->label('Vagas Ocupadas')
-                    ->numeric()
-                    ->getStateUsing(fn (Course $record): int => $record->interns()->count())
-                    ->sortable(),
+                    ->sortable()
+                    ->icon('heroicon-m-user-group'),
                 Tables\Columns\TextColumn::make('vacancies_available')
                     ->label('Vagas Disponíveis')
-                    ->numeric()
-                    ->getStateUsing(fn (Course $record): int => $record->vacancies - $record->interns()->count())
                     ->sortable()
-                    ->color(fn (Course $record): string => 
-                        ($record->vacancies - $record->interns()->count()) > 0 
-                            ? 'success' 
-                            : 'danger'
-                    ),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Criado em')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Atualizado em')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->icon('heroicon-m-square-3-stack-3d'),
+                Tables\Columns\TextColumn::make('usage_percentage')
+                    ->label('Ocupação')
+                    ->formatStateUsing(fn ($record): string => number_format(
+                        ($record->vacancies_used / $record->vacancies) * 100,
+                        1
+                    ))
+                    ->suffix('%')
+                    ->color(function ($record): string {
+                        $percentage = ($record->vacancies_used / $record->vacancies) * 100;
+                        if ($percentage >= 75) return 'danger';
+                        if ($percentage >= 60) return 'warning';
+                        return 'success';
+                    })
+                    ->icon('heroicon-m-chart-bar')
+                    ->alignEnd()
+                    ->weight('bold'),
             ])
+            ->defaultSort('name', 'asc')
+            ->striped()
             ->filters([
                 //
             ])

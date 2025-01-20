@@ -71,28 +71,25 @@ class DepartmentResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
                     ->searchable()
-                    ->copyable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold')
+                    ->icon('heroicon-m-building-office'),
                 Tables\Columns\TextColumn::make('acronym')
                     ->label('Sigla')
-                    ->copyable()
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->badge()
+                    ->color('primary')
+                    ->formatStateUsing(fn (string $state): string => strtoupper($state)),
                 Tables\Columns\TextColumn::make('interns_count')
-                    ->label('Quantidade de Estagiários')
+                    ->label('Qtd. Estagiários')
                     ->counts('interns')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Criado em')
-                    ->dateTime('d/m/Y H:i')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Atualizado em')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->icon('heroicon-m-user-group')
+                    ->alignEnd(),
             ])
+            ->defaultSort('name', 'asc')
+            ->striped()
             ->filters([
                 //
             ])

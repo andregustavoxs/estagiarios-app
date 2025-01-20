@@ -30,28 +30,30 @@ class InternsOnVacationTable extends BaseWidget
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
                     ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('email')
-                    ->label('E-mail')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('internships.department.name')
-                    ->label('Setor')
-                    ->searchable(),
+                    ->sortable()
+                    ->weight('bold')
+                    ->icon('heroicon-m-identification'),
                 Tables\Columns\TextColumn::make('internships.vacations.start_date')
                     ->label('Início das Férias')
                     ->date('d/m/Y')
-                    ->sortable(),
+                    ->sortable()
+                    ->icon('heroicon-m-calendar'),
                 Tables\Columns\TextColumn::make('internships.vacations.end_date')
                     ->label('Fim das Férias')
                     ->date('d/m/Y')
-                    ->sortable(),
+                    ->sortable()
+                    ->icon('heroicon-m-calendar-days'),
+                Tables\Columns\TextColumn::make('internships.department.acronym')
+                    ->label('Setor')
+                    ->searchable()
+                    ->badge()
+                    ->color('primary'),
+                Tables\Columns\TextColumn::make('internships.supervisor.name')
+                    ->label('Supervisor')
+                    ->searchable()
+                    ->icon('heroicon-m-user'),
             ])
-            ->filters([
-                //
-            ])
-            ->actions([
-            ])
+            ->striped()
             ->paginated([5]);
     }
 }

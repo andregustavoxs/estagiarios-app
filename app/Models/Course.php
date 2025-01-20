@@ -31,4 +31,24 @@ class Course extends Model
     {
         return max(0, $this->vacancies - $this->vacancies_used);
     }
+
+    public function getUsagePercentageAttribute(): float
+    {
+        if ($this->vacancies === 0) return 0;
+        return ($this->vacancies_used / $this->vacancies) * 100;
+    }
+
+    public function isNearLimit(): bool
+    {
+        return $this->usage_percentage >= 50;
+    }
+
+    public function scopeNearLimit($query)
+    {
+        return $query->whereRaw('CAST((
+            SELECT COUNT(*)
+            FROM internships
+            WHERE internships.course_id = courses.id
+        ) AS DECIMAL(10,2)) / CAST(courses.vacancies AS DECIMAL(10,2)) * 100 >= ?', [50]);
+    }
 }

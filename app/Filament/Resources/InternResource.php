@@ -95,76 +95,48 @@ class InternResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('photo')
-                    ->label('Foto')
-                    ->circular()
-                    ->defaultImageUrl(function ($record) {
-                        return 'https://ui-avatars.com/api/?name='.urlencode(
-                                $record->name
-                            ).'&color=FFFFFF&background=111827';
-                    }),
-
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
                     ->searchable()
-                    ->copyable()
                     ->sortable()
-                    ->weight('bold'),
-
+                    ->weight('bold')
+                    ->icon('heroicon-m-identification'),
                 Tables\Columns\TextColumn::make('email')
                     ->label('E-mail')
                     ->searchable()
                     ->sortable()
-                    ->copyable()
-                    ->copyMessage('E-mail copiado!')
-                    ->copyMessageDuration(1500),
-
-                Tables\Columns\TextColumn::make('phone')
-                    ->label('Telefone')
-                    ->copyable()
-                    ->searchable(),
-
-                Tables\Columns\IconColumn::make('is_currently_on_vacation')
-                    ->label('Em Férias')
-                    ->boolean()
-                    ->getStateUsing(fn(Intern $record): bool => $record->isCurrentlyOnVacation())
-                    ->trueIcon('heroicon-o-check-circle')
-                    ->falseIcon('heroicon-o-x-circle')
-                    ->trueColor('success')
-                    ->falseColor('danger')
-                    ->sortable(),
-            ])
-            ->defaultSort('name')
-            ->filters([
-                Tables\Filters\SelectFilter::make('status')
+                    ->icon('heroicon-m-envelope'),
+                Tables\Columns\TextColumn::make('internships.department.acronym')
+                    ->label('Setor')
+                    ->searchable()
+                    ->sortable()
+                    ->badge()
+                    ->color('primary'),
+                Tables\Columns\TextColumn::make('internships.supervisor.name')
+                    ->label('Supervisor')
+                    ->searchable()
+                    ->sortable()
+                    ->icon('heroicon-m-user'),
+                Tables\Columns\TextColumn::make('status')
                     ->label('Status')
-                    ->options([
-                        'active' => 'Ativo',
-                        'inactive' => 'Inativo',
-                    ])
-                    ->placeholder('Todos os Status')
-                    ->default('active'),
-
-                Tables\Filters\TernaryFilter::make('vacation_status')
-                    ->label('Status de Férias')
-                    ->placeholder('Todos os Estagiários')
-                    ->trueLabel('Em Férias')
-                    ->falseLabel('Não está em Férias')
-                    ->queries(
-                        true: fn(Builder $query) => $query->whereHas('internships', function (Builder $query) {
-                            $query->whereHas('vacations', function (Builder $query) {
-                                $query->whereDate('start_date', '<=', now())
-                                    ->whereDate('end_date', '>=', now());
-                            });
-                        }),
-                        false: fn(Builder $query) => $query->whereDoesntHave('internships', function (Builder $query) {
-                            $query->whereHas('vacations', function (Builder $query) {
-                                $query->whereDate('start_date', '<=', now())
-                                    ->whereDate('end_date', '>=', now());
-                            });
-                        }),
+                    ->badge()
+                    ->color(fn (string $state): string => 
+                        match ($state) {
+                            'active' => 'success',
+                            'inactive' => 'danger',
+                            default => 'warning',
+                        }
+                    )
+                    ->formatStateUsing(fn (string $state): string => 
+                        match ($state) {
+                            'active' => 'Ativo',
+                            'inactive' => 'Inativo',
+                            default => 'Desconhecido',
+                        }
                     ),
             ])
+            ->defaultSort('name', 'asc')
+            ->striped()
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->modalWidth('lg'),

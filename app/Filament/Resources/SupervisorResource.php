@@ -77,32 +77,21 @@ class SupervisorResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('photo')
-                    ->label('Foto')
-                    ->circular()
-                    ->defaultImageUrl(function ($record) {
-                        return 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=FFFFFF&background=111827';
-                    }),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
                     ->searchable()
-                    ->copyable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold')
+                    ->icon('heroicon-m-user'),
                 Tables\Columns\TextColumn::make('interns_count')
-                    ->label('Estagiários')
+                    ->label('Qtd. Estagiários')
                     ->counts('interns')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Criado em')
-                    ->dateTime('d/m/Y H:i')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Atualizado em')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->icon('heroicon-m-user-group')
+                    ->alignEnd(),
             ])
+            ->defaultSort('name', 'asc')
+            ->striped()
             ->filters([
                 //
             ])

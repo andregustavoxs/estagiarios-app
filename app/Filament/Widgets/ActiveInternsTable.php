@@ -24,27 +24,28 @@ class ActiveInternsTable extends BaseWidget
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold')
+                    ->icon('heroicon-m-identification'),
                 Tables\Columns\TextColumn::make('email')
                     ->label('E-mail')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->icon('heroicon-m-envelope'),
                 Tables\Columns\TextColumn::make('phone')
                     ->label('Telefone')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('internships.department.name')
+                    ->searchable()
+                    ->icon('heroicon-m-phone'),
+                Tables\Columns\TextColumn::make('internships.department.acronym')
                     ->label('Setor')
-                    ->searchable(),
+                    ->searchable()
+                    ->badge(),
                 Tables\Columns\TextColumn::make('internships.supervisor.name')
                     ->label('Supervisor')
-                    ->searchable(),
+                    ->searchable()
+                    ->icon('heroicon-m-user'),
             ])
-            ->filters([
-                //
-            ])
-            ->actions([
-            
-            ])
+            ->striped()
             ->paginated([5]);
     }
 }

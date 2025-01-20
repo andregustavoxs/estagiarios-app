@@ -21,7 +21,7 @@ class InternshipAgencyResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-building-office';
 
     protected static ?string $modelLabel = 'Agente de Integração';
-    
+
     protected static ?string $pluralModelLabel = 'Agentes de Integrações';
 
     public static function form(Form $form): Form
@@ -107,25 +107,24 @@ class InternshipAgencyResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('company_name')
                     ->label('Razão Social')
-                    ->copyable()
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold')
+                    ->icon('heroicon-m-building-library'),
                 Tables\Columns\TextColumn::make('trade_name')
                     ->label('Nome Fantasia')
                     ->searchable()
-                    ->copyable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Criado em')
-                    ->dateTime('d/m/Y H:i')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Atualizado em')
-                    ->dateTime('d/m/Y H:i')
+                    ->icon('heroicon-m-building-storefront'),
+                Tables\Columns\TextColumn::make('interns_count')
+                    ->label('Qtd. Estagiários')
+                    ->counts('interns')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->icon('heroicon-m-user-group')
+                    ->alignEnd(),
             ])
+            ->defaultSort('company_name', 'asc')
+            ->striped()
             ->filters([
                 //
             ])
@@ -139,7 +138,7 @@ class InternshipAgencyResource extends Resource
                                 ->title('Ação bloqueada')
                                 ->body('Não é possível excluir este agente de integração pois existem estagiários vinculados a ele.')
                                 ->send();
-                            
+
                             $action->cancel();
                         }
                     }),
@@ -155,7 +154,7 @@ class InternshipAgencyResource extends Resource
                                         ->title('Ação bloqueada')
                                         ->body('Não é possível excluir agentes de integração que possuem estagiários vinculados.')
                                         ->send();
-                                    
+
                                     $action->cancel();
                                     return;
                                 }
