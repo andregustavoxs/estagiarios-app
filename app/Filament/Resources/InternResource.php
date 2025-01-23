@@ -95,6 +95,15 @@ class InternResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ImageColumn::make('photo')
+                    ->circular()
+                    ->label('Foto')
+                    ->defaultImageUrl(function ($record) {
+                        $name = collect(explode(' ', $record->name))
+                            ->map(fn ($segment) => mb_substr($segment, 0, 1))
+                            ->join('');
+                        return 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&color=FFFFFF&background=111827';
+                    }),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
                     ->searchable()
@@ -106,28 +115,17 @@ class InternResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->icon('heroicon-m-envelope'),
-                Tables\Columns\TextColumn::make('internships.department.acronym')
-                    ->label('Setor')
-                    ->searchable()
-                    ->sortable()
-                    ->badge()
-                    ->color('primary'),
-                Tables\Columns\TextColumn::make('internships.supervisor.name')
-                    ->label('Supervisor')
-                    ->searchable()
-                    ->sortable()
-                    ->icon('heroicon-m-user'),
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->color(fn (string $state): string => 
+                    ->color(fn (string $state): string =>
                         match ($state) {
                             'active' => 'success',
                             'inactive' => 'danger',
                             default => 'warning',
                         }
                     )
-                    ->formatStateUsing(fn (string $state): string => 
+                    ->formatStateUsing(fn (string $state): string =>
                         match ($state) {
                             'active' => 'Ativo',
                             'inactive' => 'Inativo',
@@ -146,6 +144,14 @@ class InternResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('Status')
+                    ->options([
+                        'active' => 'Ativo',
+                        'inactive' => 'Inativo',
+                    ])
             ]);
     }
 

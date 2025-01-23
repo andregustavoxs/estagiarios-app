@@ -30,6 +30,7 @@ class InternsOnVacationTable extends BaseWidget
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
                     ->searchable()
+                    ->copyable()
                     ->sortable()
                     ->weight('bold')
                     ->icon('heroicon-m-identification'),
@@ -50,6 +51,7 @@ class InternsOnVacationTable extends BaseWidget
                     ->color('primary'),
                 Tables\Columns\TextColumn::make('internships.supervisor.name')
                     ->label('Supervisor')
+                    ->copyable()
                     ->searchable()
                     ->icon('heroicon-m-user'),
             ])

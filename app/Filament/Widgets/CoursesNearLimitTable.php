@@ -23,6 +23,7 @@ class CoursesNearLimitTable extends BaseWidget
                     ->label('Nome do Curso')
                     ->searchable()
                     ->sortable()
+                    ->copyable()
                     ->weight('bold')
                     ->icon('heroicon-m-academic-cap'),
                 Tables\Columns\TextColumn::make('vacancies')

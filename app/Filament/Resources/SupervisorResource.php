@@ -21,7 +21,7 @@ class SupervisorResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
     protected static ?string $modelLabel = 'Supervisor';
-    
+
     protected static ?string $pluralModelLabel = 'Supervisores';
 
     public static function form(Form $form): Form
@@ -77,6 +77,9 @@ class SupervisorResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ImageColumn::make('photo')
+                    ->label('Foto')
+                    ->circular(),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
                     ->searchable()
@@ -105,7 +108,7 @@ class SupervisorResource extends Resource
                                 ->title('Ação bloqueada')
                                 ->body('Não é possível excluir este supervisor pois existem estagiários vinculados a ele.')
                                 ->send();
-                            
+
                             $action->cancel();
                         }
                     }),
@@ -121,7 +124,7 @@ class SupervisorResource extends Resource
                                         ->title('Ação bloqueada')
                                         ->body('Não é possível excluir supervisores que possuem estagiários vinculados.')
                                         ->send();
-                                    
+
                                     $action->cancel();
                                     return;
                                 }
@@ -130,14 +133,14 @@ class SupervisorResource extends Resource
                 ]),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
             RelationManagers\InternsRelationManager::class,
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [

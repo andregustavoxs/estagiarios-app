@@ -10,7 +10,7 @@ use Filament\Widgets\TableWidget as BaseWidget;
 class ActiveInternsTable extends BaseWidget
 {
     protected static ?int $sort = 2;
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     public function table(Table $table): Table
     {
@@ -23,6 +23,7 @@ class ActiveInternsTable extends BaseWidget
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
+                    ->copyable()
                     ->searchable()
                     ->sortable()
                     ->weight('bold')
@@ -30,19 +31,23 @@ class ActiveInternsTable extends BaseWidget
                 Tables\Columns\TextColumn::make('email')
                     ->label('E-mail')
                     ->searchable()
+                    ->copyable()
                     ->sortable()
                     ->icon('heroicon-m-envelope'),
-                Tables\Columns\TextColumn::make('phone')
-                    ->label('Telefone')
+                Tables\Columns\TextColumn::make('internships.course.name')
+                    ->label('Curso')
                     ->searchable()
-                    ->icon('heroicon-m-phone'),
+                    ->copyable()
+                    ->icon('heroicon-m-academic-cap'),
                 Tables\Columns\TextColumn::make('internships.department.acronym')
                     ->label('Setor')
                     ->searchable()
+                    ->copyable()
                     ->badge(),
                 Tables\Columns\TextColumn::make('internships.supervisor.name')
                     ->label('Supervisor')
                     ->searchable()
+                    ->copyable()
                     ->icon('heroicon-m-user'),
             ])
             ->striped()
