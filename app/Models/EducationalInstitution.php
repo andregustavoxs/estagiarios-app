@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
-class InternshipAgency extends Model
+class EducationalInstitution extends Model
 {
-    /** @use HasFactory<\Database\Factories\InternshipAgencyFactory> */
+    /** @use HasFactory<\Database\Factories\EducationalInstitutionFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -30,9 +30,9 @@ class InternshipAgency extends Model
         return $this->hasManyThrough(
             Intern::class,
             Internship::class,
-            'internship_agency_id', // Foreign key on internships table
+            'educational_institution_id', // Foreign key on internships table
             'id', // Foreign key on interns table
-            'id', // Local key on internship_agencies table
+            'id', // Local key on educational_institutions table
             'intern_id' // Local key on internships table
         );
     }

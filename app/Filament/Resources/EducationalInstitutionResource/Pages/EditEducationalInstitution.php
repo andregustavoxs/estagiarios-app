@@ -1,15 +1,16 @@
 <?php
 
-namespace App\Filament\Resources\InternshipAgencyResource\Pages;
+namespace App\Filament\Resources\EducationalInstitutionResource\Pages;
 
-use App\Filament\Resources\InternshipAgencyResource;
+use App\Filament\Resources\EducationalInstitutionResource;
+use App\Models\EducationalInstitution;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Notifications\Notification;
 
-class EditInternshipAgency extends EditRecord
+class EditEducationalInstitution extends EditRecord
 {
-    protected static string $resource = InternshipAgencyResource::class;
+    protected static string $resource = EducationalInstitutionResource::class;
 
     protected function getHeaderActions(): array
     {
@@ -20,7 +21,7 @@ class EditInternshipAgency extends EditRecord
                         Notification::make()
                             ->danger()
                             ->title('Ação bloqueada')
-                            ->body('Não é possível excluir este agente de integração pois existem estagiários vinculados a ele.')
+                            ->body('Não é possível excluir este setor pois existem estagiários vinculados a ele.')
                             ->send();
                         
                         $action->cancel();

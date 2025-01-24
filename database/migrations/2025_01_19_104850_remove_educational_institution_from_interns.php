@@ -9,15 +9,15 @@ return new class extends Migration
     public function up()
     {
         Schema::table('interns', function (Blueprint $table) {
-            $table->dropForeign(['internship_agency_id']);
-            $table->dropColumn('internship_agency_id');
+            $table->dropForeign(['educational_institution_id']);
+            $table->dropColumn('educational_institution_id');
         });
     }
 
     public function down()
     {
         Schema::table('interns', function (Blueprint $table) {
-            $table->foreignId('internship_agency_id')
+            $table->foreignId('educational_institution_id')
                 ->constrained()
                 ->restrictOnDelete();
         });

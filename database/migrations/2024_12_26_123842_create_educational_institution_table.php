@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('internship_agencies', function (Blueprint $table) {
+        Schema::create('educational_institutions', function (Blueprint $table) {
             $table->id();
             $table->string('cnpj')->unique();
             $table->string('company_name')->unique();
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('internship_agencies');
+        Schema::dropIfExists('educational_institutions');
     }
 };

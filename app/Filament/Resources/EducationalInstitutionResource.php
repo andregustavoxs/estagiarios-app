@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\InternshipAgencyResource\Pages;
-use App\Filament\Resources\InternshipAgencyResource\RelationManagers;
-use App\Models\InternshipAgency;
+use App\Filament\Resources\EducationalInstitutionResource\Pages;
+use App\Filament\Resources\EducationalInstitutionResource\RelationManagers;
+use App\Models\EducationalInstitution;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -14,23 +14,23 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Filament\Notifications\Notification;
 
-class InternshipAgencyResource extends Resource
+class EducationalInstitutionResource extends Resource
 {
-    protected static ?string $model = InternshipAgency::class;
+    protected static ?string $model = EducationalInstitution::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-building-office';
+    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
 
-    protected static ?string $modelLabel = 'Agente de Integração';
+    protected static ?string $modelLabel = 'Instituição de Ensino';
 
-    protected static ?string $pluralModelLabel = 'Agentes de Integrações';
+    protected static ?string $pluralModelLabel = 'Instituições de Ensino';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Informações da Empresa')
-                    ->description('Dados cadastrais do agente de integração')
-                    ->icon('heroicon-o-building-office')
+                Forms\Components\Section::make('Informações da Instituição de Ensino')
+                    ->description('Dados cadastrais da instituição de ensino')
+                    ->icon('heroicon-o-academic-cap')    
                     ->schema([
                         Forms\Components\Grid::make(2)
                             ->schema([
@@ -38,9 +38,9 @@ class InternshipAgencyResource extends Resource
                                     ->label('Razão Social')
                                     ->required()
                                     ->maxLength(255)
-                                    ->placeholder('Digite a razão social da empresa')
-                                    ->helperText('Nome oficial registrado da empresa')
-                                    ->prefixIcon('heroicon-o-building-office')
+                                    ->placeholder('Digite a razão social da instituição de ensino')
+                                    ->helperText('Nome oficial registrado da instituição de ensino')
+                                    ->prefixIcon('heroicon-o-academic-cap')
                                     ->unique(ignoreRecord: true)
                                     ->validationMessages([
                                         'unique' => 'Esta razão social já está em uso.',
@@ -52,7 +52,7 @@ class InternshipAgencyResource extends Resource
                                     ->required()
                                     ->maxLength(255)
                                     ->placeholder('Digite o nome fantasia')
-                                    ->helperText('Nome comercial ou marca da empresa')
+                                    ->helperText('Nome comercial ou marca da instituição de ensino')
                                     ->prefixIcon('heroicon-o-building-storefront')
                                     ->unique(ignoreRecord: true)
                                     ->validationMessages([
@@ -65,7 +65,7 @@ class InternshipAgencyResource extends Resource
                                     ->maxLength(18)
                                     ->mask('99.999.999/9999-99')
                                     ->placeholder('00.000.000/0000-00')
-                                    ->helperText('CNPJ da empresa (apenas números)')
+                                    ->helperText('CNPJ da instituição de ensino (apenas números)')        
                                     ->prefixIcon('heroicon-o-identification')
                                     ->unique(ignoreRecord: true)
                                     ->validationMessages([
@@ -75,7 +75,7 @@ class InternshipAgencyResource extends Resource
                     ]),
 
                 Forms\Components\Section::make('Informações de Contato')
-                    ->description('Dados para contato com o agente de integração')
+                    ->description('Dados para contato com a instituição de ensino')
                     ->icon('heroicon-o-phone')
                     ->schema([
                         Forms\Components\Grid::make(2)
@@ -131,12 +131,12 @@ class InternshipAgencyResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
-                    ->before(function ($action, InternshipAgency $record) {
+                    ->before(function ($action, EducationalInstitution $record) {
                         if ($record->interns()->count() > 0) {
                             Notification::make()
                                 ->danger()
                                 ->title('Ação bloqueada')
-                                ->body('Não é possível excluir este agente de integração pois existem estagiários vinculados a ele.')
+                                ->body('Não é possível excluir esta instituição de ensino pois existem estagiários vinculados a ela.')
                                 ->send();
 
                             $action->cancel();
@@ -152,7 +152,7 @@ class InternshipAgencyResource extends Resource
                                     Notification::make()
                                         ->danger()
                                         ->title('Ação bloqueada')
-                                        ->body('Não é possível excluir agentes de integração que possuem estagiários vinculados.')
+                                        ->body('Não é possível excluir instituções de ensino que possuem estagiários vinculados.')
                                         ->send();
 
                                     $action->cancel();
@@ -174,9 +174,9 @@ class InternshipAgencyResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListInternshipAgencies::route('/'),
-            'create' => Pages\CreateInternshipAgency::route('/create'),
-            'edit' => Pages\EditInternshipAgency::route('/{record}/edit'),
+            'index' => Pages\ListEducationalInstitutions::route('/'),
+            'create' => Pages\CreateEducationalInstitution::route('/create'),
+            'edit' => Pages\EditEducationalInstitution::route('/{record}/edit'),
         ];
     }
 }

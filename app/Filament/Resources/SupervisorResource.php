@@ -78,8 +78,14 @@ class SupervisorResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('photo')
-                    ->label('Foto')
-                    ->circular(),
+                ->circular()
+                ->label('Foto')
+                ->defaultImageUrl(function ($record) {
+                    $name = collect(explode(' ', $record->name))
+                        ->map(fn ($segment) => mb_substr($segment, 0, 1))
+                        ->join('');
+                    return 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&color=FFFFFF&background=111827';
+                }),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
                     ->searchable()

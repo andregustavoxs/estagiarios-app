@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('interns', function (Blueprint $table) {
-            $table->foreignId('internship_agency_id')
-                ->constrained('internship_agencies')
+            $table->foreignId('educational_institution_id')
+                ->constrained('educational_institutions')
                 ->restrictOnDelete();
         });
     }
@@ -24,8 +24,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('interns', function (Blueprint $table) {
-            $table->dropForeign(['internship_agency_id']);
-            $table->dropColumn('internship_agency_id');
+            $table->dropForeign(['educational_institution_id']);
+            $table->dropColumn('educational_institution_id');
         });
     }
 };

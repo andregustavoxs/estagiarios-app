@@ -20,7 +20,7 @@ class Internship extends Model
         'course_id',
         'department_id',
         'supervisor_id',
-        'internship_agency_id',
+        'educational_institution_id',
         'start_date',
         'end_date',
     ];
@@ -50,9 +50,9 @@ class Internship extends Model
         return $this->belongsTo(Supervisor::class);
     }
 
-    public function internshipAgency(): BelongsTo
+    public function educationalInstitution(): BelongsTo
     {
-        return $this->belongsTo(InternshipAgency::class);
+        return $this->belongsTo(EducationalInstitution::class);
     }
 
     public function vacations(): HasMany

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('department_id')->constrained()->restrictOnDelete()->cascadeOnUpdate();
             $table->foreignId('supervisor_id')->constrained()->restrictOnDelete()->cascadeOnUpdate();
             $table->foreignId('course_id')->constrained()->restrictOnDelete()->cascadeOnUpdate();
-            $table->foreignId('internship_agency_id')->constrained()->restrictOnDelete()->cascadeOnUpdate();
+            $table->foreignId('educational_institution_id')->constrained()->restrictOnDelete()->cascadeOnUpdate();
             $table->timestamps();
         });
     }

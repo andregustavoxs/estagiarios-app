@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::table('interns', function (Blueprint $table) {
             // Drop the existing foreign key and column
-            $table->dropForeign(['internship_agency_id']);
-            $table->dropColumn('internship_agency_id');
+            $table->dropForeign(['educational_institution_id']);
+            $table->dropColumn('educational_institution_id');
 
             // Recreate the column as non-nullable with restrict on delete
-            $table->foreignId('internship_agency_id')
-                ->constrained('internship_agencies')
+            $table->foreignId('educational_institution_id')
+                ->constrained('educational_institutions')
                 ->restrictOnDelete();
         });
     }
@@ -30,14 +30,14 @@ return new class extends Migration
     {
         Schema::table('interns', function (Blueprint $table) {
             // Drop the existing foreign key and column
-            $table->dropForeign(['internship_agency_id']);
-            $table->dropColumn('internship_agency_id');
+            $table->dropForeign(['educational_institution_id']);
+            $table->dropColumn('educational_institution_id');
 
             // Recreate the column as nullable with set null on delete
-            $table->foreignId('internship_agency_id')
+            $table->foreignId('educational_institution_id')
                 ->after('course_id')
                 ->nullable()
-                ->constrained('internship_agencies')
+                ->constrained('educational_institutions')
                 ->onDelete('set null');
         });
     }

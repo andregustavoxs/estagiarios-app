@@ -110,11 +110,26 @@ class InternResource extends Resource
                     ->sortable()
                     ->weight('bold')
                     ->icon('heroicon-m-identification'),
-                Tables\Columns\TextColumn::make('email')
-                    ->label('E-mail')
+                Tables\Columns\TextColumn::make('internships.department.acronym')
+                    ->label('Setor')
                     ->searchable()
                     ->sortable()
-                    ->icon('heroicon-m-envelope'),
+                    ->badge(),
+                Tables\Columns\TextColumn::make('internships.course.name')
+                    ->label('Curso')
+                    ->searchable()
+                    ->copyable()
+                    ->icon('heroicon-m-academic-cap'),
+                Tables\Columns\TextColumn::make('internships.educationalInstitution.trade_name')
+                    ->label('Instituição Educacional')
+                    ->searchable()
+                    ->copyable()
+                    ->icon('heroicon-m-academic-cap'),
+                Tables\Columns\TextColumn::make('internships.supervisor.name')
+                    ->label('Supervisor')
+                    ->searchable()
+                    ->copyable()
+                    ->icon('heroicon-m-user'),
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
                     ->badge()

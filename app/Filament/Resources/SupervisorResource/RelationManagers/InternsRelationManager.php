@@ -114,6 +114,14 @@ class InternsRelationManager extends RelationManager
                                         ->helperText('Supervisor responsável')
                                         ->columnSpan(1)
                                         ->prefixIcon('heroicon-o-user'),
+                                        
+                                    Forms\Components\Select::make('educational_institution_id')
+                                        ->relationship('educationalInstitution', 'trade_name')
+                                        ->label('Instituição de Ensino')
+                                        ->required()
+                                        ->placeholder('Selecione a instituiçãeo de ensino do estagiário')
+                                        ->helperText('Instituição de ensino responsável pelo estagiário')
+                                        ->prefixIcon('heroicon-o-building-library'),
                                 ]),
                         ]),
                 ])->columnSpan('full'),
@@ -129,27 +137,27 @@ class InternsRelationManager extends RelationManager
             ->description('Lista de estagiários sob supervisão')
             ->columns([
                 Tables\Columns\TextColumn::make('intern.name')
-                    ->label('Nome')
-                    ->searchable()
-                    ->sortable()
-                    ->weight('bold')
-                    ->icon('heroicon-m-identification'),
-                Tables\Columns\TextColumn::make('registration_number')
-                    ->label('Matrícula')
-                    ->searchable()
-                    ->sortable()
-                    ->icon('heroicon-m-document-text')
-                    ->color('primary'),
-                Tables\Columns\TextColumn::make('intern.email')
-                    ->label('E-mail')
-                    ->searchable()
-                    ->sortable()
-                    ->icon('heroicon-m-envelope'),
-                Tables\Columns\TextColumn::make('intern.phone')
-                    ->label('Telefone')
-                    ->searchable()
-                    ->sortable()
-                    ->icon('heroicon-m-phone'),
+                ->label('Nome')
+                ->searchable()
+                ->sortable()
+                ->weight('bold')
+                ->icon('heroicon-m-identification'),
+            Tables\Columns\TextColumn::make('intern.internships.department.acronym')
+                ->label('Setor')
+                ->searchable()
+                ->badge(),
+            Tables\Columns\TextColumn::make('intern.internships.course.name')
+                ->label('Curso')
+                ->searchable()
+                ->icon('heroicon-m-academic-cap'),
+            Tables\Columns\TextColumn::make('intern.internships.educationalInstitution.trade_name')
+                ->label('Instituição Educacional')
+                ->searchable()
+                ->icon('heroicon-m-building-library'),
+            Tables\Columns\TextColumn::make('intern.internships.supervisor.name')
+                ->label('Supervisor')
+                ->searchable()
+                ->icon('heroicon-m-user'),
             ])
             ->defaultSort('intern.name', 'asc')
             ->striped()

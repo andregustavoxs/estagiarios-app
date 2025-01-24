@@ -127,13 +127,13 @@ class InternshipResource extends Resource
                                 ->preload()
                                 ->helperText('Supervisor responsável pelo estagiário'),
 
-                            Forms\Components\Select::make('internship_agency_id')
-                                ->label('Agente de Integração')
-                                ->relationship('internshipAgency', 'trade_name')
+                            Forms\Components\Select::make('educational_institution_id')
+                                ->label('Instituição Educacional')
+                                ->relationship('educationalInstitution', 'trade_name')
                                 ->required()
                                 ->searchable()
                                 ->preload()
-                                ->helperText('Agente de integração responsável'),
+                                ->helperText('Instituição educacional responsável'),
                         ])
                         ->columns(2)
                 ])
@@ -145,28 +145,35 @@ class InternshipResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('intern.internships.registration_number')
+                    ->label('Matrícula')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('bold')
+                    ->icon('heroicon-m-identification'),
                 Tables\Columns\TextColumn::make('intern.name')
                     ->label('Estagiário')
                     ->searchable()
                     ->sortable()
                     ->weight('bold')
-                    ->icon('heroicon-m-identification'),
+                    ->icon('heroicon-m-user'),
                 Tables\Columns\TextColumn::make('department.acronym')
                     ->label('Setor')
                     ->searchable()
                     ->sortable()
                     ->badge()
                     ->color('primary'),
-                Tables\Columns\TextColumn::make('supervisor.name')
-                    ->label('Supervisor')
-                    ->searchable()
-                    ->sortable()
-                    ->icon('heroicon-m-user'),
                 Tables\Columns\TextColumn::make('course.name')
                     ->label('Curso')
                     ->searchable()
                     ->sortable()
                     ->icon('heroicon-m-academic-cap'),
+                Tables\Columns\TextColumn::make('intern.internships.educationalInstitution.trade_name')
+                    ->label('Instituição de Ensino')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('bold')
+                    ->icon('heroicon-m-building-library'),
             ])
             ->defaultSort('intern.name', 'asc')
             ->striped()
