@@ -16,7 +16,9 @@ class StatsOverview extends BaseWidget
     protected function getStats(): array
     {
         // Get active interns count
-        $activeInternsCount = Intern::where('status', 'active')->count();
+        $activeInternsCount = Intern::whereHas('internships', function ($query) {
+            $query->where('status', 'active');
+        })->count();
 
         // Get courses close to limit
         $coursesNearLimit = Course::nearLimit()->count();

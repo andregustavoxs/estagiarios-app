@@ -58,16 +58,6 @@ class InternResource extends Resource
                                             ->placeholder('(00) 00000-0000')
                                             ->prefixIcon('heroicon-m-phone')
                                             ->helperText('Número para contato com DDD'),
-
-                                        Forms\Components\Select::make('status')
-                                            ->label('Status')
-                                            ->options([
-                                                'active' => 'Ativo',
-                                                'inactive' => 'Inativo',
-                                            ])
-                                            ->default('active')
-                                            ->helperText('Status do Estagiário')
-                                            ->required(),
                                     ]),
                             ]),
 
@@ -130,23 +120,21 @@ class InternResource extends Resource
                     ->searchable()
                     ->copyable()
                     ->icon('heroicon-m-user'),
-                Tables\Columns\TextColumn::make('status')
+                Tables\Columns\TextColumn::make('internships.status')
                     ->label('Status')
+                    ->searchable()
+                    ->copyable()
                     ->badge()
-                    ->color(fn (string $state): string =>
-                        match ($state) {
-                            'active' => 'success',
-                            'inactive' => 'danger',
-                            default => 'warning',
-                        }
-                    )
-                    ->formatStateUsing(fn (string $state): string =>
-                        match ($state) {
-                            'active' => 'Ativo',
-                            'inactive' => 'Inativo',
-                            default => 'Desconhecido',
-                        }
-                    ),
+                    ->color(fn (string $state): string => match ($state) {
+                        'active' => 'success',
+                        'inactive' => 'danger',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'active' => 'Ativo',
+                        'inactive' => 'Inativo',
+                        default => $state,
+                    }),
             ])
             ->defaultSort('name', 'asc')
             ->striped()
@@ -167,6 +155,13 @@ class InternResource extends Resource
                         'active' => 'Ativo',
                         'inactive' => 'Inativo',
                     ])
+                    ->query(function (Builder $query, array $data) {
+                        if (isset($data['value'])) {
+                            $query->whereHas('internships', function ($query) use ($data) {
+                                $query->where('status', $data['value']);
+                            });
+                        }
+                    })
             ]);
     }
 

@@ -41,13 +41,27 @@ class InternshipResource extends Resource
                                 ->preload()
                                 ->helperText('Selecione o estagiário'),
 
-                            Forms\Components\TextInput::make('registration_number')
-                                ->label('Matrícula')
-                                ->required()
-                                ->unique(ignoreRecord: true)
-                                ->maxLength(255)
-                                ->placeholder('Ex: 2025001')
-                                ->helperText('Número de matrícula único do estagiário'),
+                            Forms\Components\Grid::make(2)
+                                ->schema([
+                                    Forms\Components\TextInput::make('registration_number')
+                                        ->label('Matrícula')
+                                        ->required()
+                                        ->unique(ignoreRecord: true)
+                                        ->maxLength(255)
+                                        ->placeholder('Ex: 2025001')
+                                        ->helperText('Número de matrícula único do estagiário'),
+
+                                    Forms\Components\Select::make('status')
+                                        ->label('Status')
+                                        ->options([
+                                            'active' => 'Ativo',
+                                            'inactive' => 'Inativo',
+                                        ])
+                                        ->required()
+                                        ->native(false)
+                                        ->helperText('Status do estágio')
+                                        ->prefixIcon('heroicon-o-check-circle'),
+                                ]),
 
                             Forms\Components\Grid::make(2)
                                 ->schema([

@@ -6,18 +6,25 @@ use App\Models\Intern;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Database\Eloquent\Builder;
 
 class ActiveInternsTable extends BaseWidget
 {
     protected static ?int $sort = 2;
     protected int|string|array $columnSpan = 'full';
 
+    public function query(): Builder
+    {
+        return Intern::query()
+            ->whereHas('internships', function ($query) {
+                $query->where('status', 'active');
+            });
+    }
+
     public function table(Table $table): Table
     {
         return $table
-            ->query(
-                Intern::query()->where('status', 'active')
-            )
+            ->query($this->query())
             ->heading('Estagiários Ativos')
             ->description('Lista de todos os estagiários atualmente ativos')
             ->columns([

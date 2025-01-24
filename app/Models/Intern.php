@@ -16,11 +16,9 @@ class Intern extends Model
         'email',
         'phone',
         'photo',
-        'status',
     ];
 
     protected $casts = [
-        'status' => 'string',
     ];
 
     public function internships(): HasMany
@@ -44,11 +42,11 @@ class Intern extends Model
 
         return $query->orderBy(function ($query) use ($today) {
             return $query->selectRaw('EXISTS (
-                SELECT 1 
-                FROM internships i 
-                JOIN intern_vacations v ON v.internship_id = i.id 
-                WHERE i.intern_id = interns.id 
-                AND DATE(v.start_date) <= ? 
+                SELECT 1
+                FROM internships i
+                JOIN intern_vacations v ON v.internship_id = i.id
+                WHERE i.intern_id = interns.id
+                AND DATE(v.start_date) <= ?
                 AND DATE(v.end_date) >= ?
             )', [$today, $today]);
         }, $direction);
