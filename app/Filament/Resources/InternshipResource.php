@@ -127,7 +127,7 @@ class InternshipResource extends Resource
 
                             Forms\Components\Select::make('department_id')
                                 ->label('Setor')
-                                ->relationship('department', 'name')
+                                ->relationship('department', 'acronym')
                                 ->required()
                                 ->searchable()
                                 ->preload()

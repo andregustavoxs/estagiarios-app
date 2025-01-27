@@ -32,44 +32,51 @@ class SupervisorResource extends Resource
                     'default' => 1,
                     'sm' => 3,
                 ])
-                    ->schema([
-                        Forms\Components\Section::make('Informações do Supervisor')
-                            ->description('Dados do supervisor')
-                            ->icon('heroicon-o-user')
-                            ->columnSpan(2)
-                            ->schema([
-                                Forms\Components\TextInput::make('name')
-                                    ->label('Nome Completo')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->placeholder('Digite o nome completo do supervisor')
-                                    ->helperText('Nome completo do supervisor')
-                                    ->prefixIcon('heroicon-o-user')
-                                    ->unique(ignoreRecord: true)
-                                    ->validationMessages([
-                                        'unique' => 'Este nome de supervisor já está em uso.',
-                                    ])
-                                    ->columnSpanFull(),
-                            ]),
+                ->schema([
+                    Forms\Components\Section::make('Informações do Supervisor')
+                        ->description('Dados do supervisor')
+                        ->icon('heroicon-o-user')
+                        ->columnSpan(2)
+                        ->schema([
+                            Forms\Components\Grid::make(2)
+                                ->schema([
+                                    Forms\Components\TextInput::make('name')
+                                        ->label('Nome Completo')
+                                        ->required()
+                                        ->maxLength(255)
+                                        ->placeholder('Digite o nome completo do supervisor')
+                                        ->helperText('Nome completo do supervisor')
+                                        ->prefixIcon('heroicon-o-user')
+                                        ->unique(ignoreRecord: true)
+                                        ->validationMessages([
+                                            'unique' => 'Este nome de supervisor já está em uso.',
+                                        ])
+                                        ->columnSpanFull(),
+                                    Forms\Components\Select::make('department_id')
+                                        ->label('Setor')
+                                        ->relationship('department', 'acronym')
+                                        ->required()
+                                        ->searchable()
+                                        ->preload()
+                                        ->native(false)
+                                        ->maxWidth('full')
+                                        ->helperText('Setor do supervisor')
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
 
-                        Forms\Components\Section::make('Foto')
-                            ->description('Foto de identificação do supervisor')
-                            ->icon('heroicon-o-camera')
-                            ->columnSpan(1)
-                            ->schema([
-                                Forms\Components\FileUpload::make('photo')
-                                    ->label('Foto do Perfil')
-                                    ->image()
-                                    ->directory('supervisors')
-                                    ->imageEditor()
-                                    ->circleCropper()
-                                    ->imageEditorAspectRatios([
-                                        '1:1',
-                                    ])
-                                    ->helperText('Faça upload de uma foto de identificação')
-                                    ->columnSpanFull(),
-                            ]),
-                    ]),
+                    Forms\Components\Section::make('Foto')
+                        ->description('Foto do supervisor')
+                        ->icon('heroicon-o-camera')
+                        ->columnSpan(1)
+                        ->schema([
+                            Forms\Components\FileUpload::make('photo')
+                                ->label('Foto')
+                                ->image()
+                                ->imageEditor()
+                                ->columnSpanFull(),
+                        ]),
+                ]),
             ]);
     }
 
@@ -89,9 +96,12 @@ class SupervisorResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
                     ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('department.acronym')
+                    ->label('Setor')
+                    ->searchable()
                     ->sortable()
-                    ->weight('bold')
-                    ->icon('heroicon-m-user'),
+                    ->badge(),
                 Tables\Columns\TextColumn::make('interns_count')
                     ->label('Qtd. Estagiários')
                     ->counts('interns')

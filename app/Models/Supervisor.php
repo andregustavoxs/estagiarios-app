@@ -17,10 +17,16 @@ class Supervisor extends Model
     protected $fillable = [
         'name',
         'photo',
+        'department_id',
     ];
 
     public function interns(): HasMany
     {
         return $this->hasMany(Internship::class);
+    }
+
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
     }
 }
