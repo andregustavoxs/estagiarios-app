@@ -16,12 +16,20 @@ class EditDepartment extends EditRecord
         return [
             Actions\DeleteAction::make()
                 ->before(function ($action) {
-                    if ($this->record->interns()->count() > 0) {
-                        Notification::make()
-                            ->danger()
-                            ->title('Ação bloqueada')
-                            ->body('Não é possível excluir este setor pois existem estagiários vinculados a ele.')
-                            ->send();
+                    if ($this->record->interns()->count() > 0 || $this->record->supervisors()->count() > 0) {
+                        if ($this->record->interns()->count() > 0) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Ação bloqueada')
+                                ->body('Não é possível excluir este setor pois existem estagiários vinculados a ele.')
+                                ->send();
+                        } elseif ($this->record->supervisors()->count() > 0) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Ação bloqueada')
+                                ->body('Não é possível excluir este setor pois existem supervisores vinculados a ele.')
+                                ->send();
+                        }
                         
                         $action->cancel();
                     }

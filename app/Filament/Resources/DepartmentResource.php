@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\DepartmentResource\Pages;
-use App\Filament\Resources\DepartmentResource\RelationManagers;
 use App\Models\Department;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -13,6 +12,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Filament\Notifications\Notification;
+use App\Filament\Resources\DepartmentResource\RelationManagers;
 
 class DepartmentResource extends Resource
 {
@@ -21,7 +21,7 @@ class DepartmentResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
 
     protected static ?string $modelLabel = 'Setor';
-    
+
     protected static ?string $pluralModelLabel = 'Setores';
 
     public static function form(Form $form): Form
@@ -53,12 +53,32 @@ class DepartmentResource extends Resource
                                     ->placeholder('Ex: RH, TI, ADM')
                                     ->helperText('Sigla ou abreviação do setor')
                                     ->prefixIcon('heroicon-o-identification')
-                                    ->formatStateUsing(fn (?string $state): string => $state ? strtoupper($state) : '')
-                                    ->dehydrateStateUsing(fn (?string $state): string => $state ? strtoupper($state) : '')
+                                    ->formatStateUsing(fn(?string $state): string => $state ? strtoupper($state) : '')
+                                    ->dehydrateStateUsing(fn(?string $state): string => $state ? strtoupper($state) : ''
+                                    )
                                     ->unique(ignoreRecord: true)
                                     ->validationMessages([
                                         'unique' => 'Esta sigla já está em uso.',
                                     ]),
+                            ]),
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('extension')
+                                    ->label('Ramal')
+                                    ->required()
+                                    ->numeric()
+                                    ->length(4)
+                                    ->maxLength(4)
+                                    ->mask('9999')
+                                    ->placeholder('Ex: 1234')
+                                    ->helperText('Ramal do setor (4 dígitos)')
+                                    ->prefixIcon('heroicon-o-phone')
+                                    ->unique(ignoreRecord: true)
+                                    ->validationMessages([
+                                        'unique' => 'Este ramal já está em uso.',
+                                        'numeric' => 'O ramal deve conter apenas números.',
+                                        'length' => 'O ramal deve ter exatamente 4 dígitos.',
+                                    ])
                             ]),
                     ]),
             ]);
@@ -80,7 +100,17 @@ class DepartmentResource extends Resource
                     ->sortable()
                     ->badge()
                     ->color('primary')
-                    ->formatStateUsing(fn (string $state): string => strtoupper($state)),
+                    ->formatStateUsing(fn(string $state): string => strtoupper($state)),
+                Tables\Columns\TextColumn::make('supervisors.name')
+                    ->label('Supervisor')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('bold')
+                    ->icon('heroicon-m-user'),
+                Tables\Columns\TextColumn::make('extension')
+                    ->label('Ramal')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('interns_count')
                     ->label('Qtd. Estagiários')
                     ->counts('interns')
@@ -96,14 +126,14 @@ class DepartmentResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
-                    ->before(function ($action, Department $record) {
-                        if ($record->interns()->count() > 0) {
+                    ->before(function ($action, $record) {
+                        if ($record->supervisors()->count() > 0) {
                             Notification::make()
                                 ->danger()
                                 ->title('Ação bloqueada')
-                                ->body('Não é possível excluir este setor pois existem estagiários vinculados a ele.')
+                                ->body('Não é possível excluir este setor pois existem supervisores vinculados a ele.')
                                 ->send();
-                            
+
                             $action->cancel();
                         }
                     }),
@@ -113,13 +143,13 @@ class DepartmentResource extends Resource
                     Tables\Actions\DeleteBulkAction::make()
                         ->before(function ($action, Collection $records) {
                             foreach ($records as $record) {
-                                if ($record->interns()->count() > 0) {
+                                if ($record->supervisors()->count() > 0) {
                                     Notification::make()
                                         ->danger()
                                         ->title('Ação bloqueada')
-                                        ->body('Não é possível excluir setores que possuem estagiários vinculados.')
+                                        ->body('Não é possível excluir setores que possuem supervisores vinculados.')
                                         ->send();
-                                    
+
                                     $action->cancel();
                                     return;
                                 }
@@ -128,14 +158,14 @@ class DepartmentResource extends Resource
                 ]),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
             RelationManagers\InternsRelationManager::class,
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [

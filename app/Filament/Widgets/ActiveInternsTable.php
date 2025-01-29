@@ -35,12 +35,12 @@ class ActiveInternsTable extends BaseWidget
                     ->sortable()
                     ->weight('bold')
                     ->icon('heroicon-m-identification'),
-                Tables\Columns\TextColumn::make('email')
-                    ->label('E-mail')
+                Tables\Columns\TextColumn::make('internships.educationalInstitution.trade_name')
+                    ->label('Instituição de Ensino')
                     ->searchable()
                     ->copyable()
                     ->sortable()
-                    ->icon('heroicon-m-envelope'),
+                    ->icon('heroicon-m-academic-cap'),
                 Tables\Columns\TextColumn::make('internships.course.name')
                     ->label('Curso')
                     ->searchable()

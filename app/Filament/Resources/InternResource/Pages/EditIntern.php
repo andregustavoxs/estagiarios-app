@@ -4,6 +4,7 @@ namespace App\Filament\Resources\InternResource\Pages;
 
 use App\Filament\Resources\InternResource;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 
 class EditIntern extends EditRecord
@@ -14,7 +15,17 @@ class EditIntern extends EditRecord
     {
         return [
             Actions\DeleteAction::make()
-                ->label('Excluir'),
+                ->before(function ($action) {
+                    if ($this->record->internships()->count() > 0) {
+                        Notification::make()
+                            ->danger()
+                            ->title('Ação bloqueada')
+                            ->body('Não é possível excluir este estagiário pois existem estágios vinculados a ele.')
+                            ->send();
+                        
+                        $action->cancel();
+                    }
+                }),
             Actions\ForceDeleteAction::make()
                 ->label('Excluir Permanentemente'),
             Actions\RestoreAction::make()

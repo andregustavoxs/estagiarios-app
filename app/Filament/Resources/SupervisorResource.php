@@ -63,6 +63,23 @@ class SupervisorResource extends Resource
                                         ->helperText('Setor do supervisor')
                                         ->columnSpanFull(),
                                 ]),
+                            Forms\Components\TextInput::make('extension')
+                                ->label('Ramal')
+                                ->required()
+                                ->numeric()
+                                ->length(4)
+                                ->maxLength(4)
+                                ->mask('9999')
+                                ->placeholder('Ex: 1234')
+                                ->helperText('Ramal do supervisor (4 dígitos)')
+                                ->prefixIcon('heroicon-o-phone')
+                                ->unique(ignoreRecord: true)
+                                ->validationMessages([
+                                    'unique' => 'Este ramal já está em uso.',
+                                    'numeric' => 'O ramal deve conter apenas números.',
+                                    'length' => 'O ramal deve ter exatamente 4 dígitos.',
+                                ])
+                                ->columnSpanFull(),
                         ]),
 
                     Forms\Components\Section::make('Foto')
@@ -102,6 +119,10 @@ class SupervisorResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->badge(),
+                Tables\Columns\TextColumn::make('extension')
+                    ->label('Ramal')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('interns_count')
                     ->label('Qtd. Estagiários')
                     ->counts('interns')

@@ -29,51 +29,61 @@ class SupervisorSeeder extends Seeder
                 'name' => 'Carlos Roberto Silva',
                 'photo' => $malePhotos[$maleIndex++]['picture']['large'],
                 'department_id' => $departments[0]->id,
+                'extension' => '1234',
             ],
             [
                 'name' => 'Maria Fernanda Santos',
                 'photo' => $femalePhotos[$femaleIndex++]['picture']['large'],
                 'department_id' => $departments[1]->id,
+                'extension' => '1235',
             ],
             [
                 'name' => 'Pedro Henrique Costa',
                 'photo' => $malePhotos[$maleIndex++]['picture']['large'],
                 'department_id' => $departments[2]->id,
+                'extension' => '1236',
             ],
             [
                 'name' => 'Ana Beatriz Lima',
                 'photo' => $femalePhotos[$femaleIndex++]['picture']['large'],
                 'department_id' => $departments[3]->id,
+                'extension' => '1237',
             ],
             [
                 'name' => 'Lucas Oliveira Martins',
                 'photo' => $malePhotos[$maleIndex++]['picture']['large'],
                 'department_id' => $departments[4]->id,
+                'extension' => '1238',
             ],
             [
                 'name' => 'Patricia Santos Costa',
                 'photo' => $femalePhotos[$femaleIndex++]['picture']['large'],
                 'department_id' => $departments[5]->id,
+                'extension' => '1239',
             ],
             [
                 'name' => 'Roberto Carlos Lima',
                 'photo' => $malePhotos[$maleIndex++]['picture']['large'],
                 'department_id' => $departments[6]->id,
+                'extension' => '1240',
             ],
             [
                 'name' => 'Fernanda Oliveira Silva',
                 'photo' => $femalePhotos[$femaleIndex++]['picture']['large'],
                 'department_id' => $departments[7]->id,
+                'extension' => '1241',
             ],
             [
                 'name' => 'Marcelo Henrique Santos',
                 'photo' => $malePhotos[$maleIndex++]['picture']['large'],
                 'department_id' => $departments[8]->id,
+                'extension' => '1242',
             ],
             [
                 'name' => 'Camila Lima Pereira',
                 'photo' => $femalePhotos[$femaleIndex++]['picture']['large'],
                 'department_id' => $departments[9]->id,
+                'extension' => '1243',
             ],
         ];
 

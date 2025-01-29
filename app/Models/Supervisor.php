@@ -17,6 +17,7 @@ class Supervisor extends Model
     protected $fillable = [
         'name',
         'photo',
+        'extension',
         'department_id',
     ];
 
