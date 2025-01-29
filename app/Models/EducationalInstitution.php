@@ -18,6 +18,14 @@ class EducationalInstitution extends Model
         'trade_name',
         'phone',
         'contact_person',
+        'name',
+        'postal_code',
+        'address',
+        'number',
+        'complement',
+        'neighborhood',
+        'city',
+        'uf',
     ];
 
     public function internships(): HasMany
