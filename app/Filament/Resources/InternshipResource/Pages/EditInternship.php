@@ -4,8 +4,8 @@ namespace App\Filament\Resources\InternshipResource\Pages;
 
 use App\Filament\Resources\InternshipResource;
 use Filament\Actions;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Notifications\Notification;
 
 class EditInternship extends EditRecord
 {
@@ -15,17 +15,40 @@ class EditInternship extends EditRecord
     {
         return [
             Actions\DeleteAction::make()
-                ->before(function ($action) {
-                    if ($this->record->commitment_terms()->count() > 0) {
+                ->requiresConfirmation()
+                ->successNotification(
+                    Notification::make()
+                        ->success()
+                        ->title('Estágio arquivado')
+                        ->body('O estágio foi movido para a lixeira.')
+                ),
+            Actions\ForceDeleteAction::make()
+                ->requiresConfirmation()
+                ->before(function () {
+                    // Check if internship has an intern (including soft deleted ones)
+                    if ($this->record->intern()->withTrashed()->exists()) {
                         Notification::make()
                             ->danger()
-                            ->title('Ação bloqueada')
-                            ->body('Não é possível excluir este estágio pois existem termos de compromisso vinculados a ele.')
+                            ->title('Não é possível excluir')
+                            ->body('Este estágio possui um estagiário vinculado (ativo ou arquivado). Remova o estagiário primeiro.')
                             ->send();
-                        
-                        $action->cancel();
+
+                        $this->halt();
                     }
-                }),
+                })
+                ->successNotification(
+                    Notification::make()
+                        ->success()
+                        ->title('Estágio excluído')
+                        ->body('O estágio foi excluído permanentemente.')
+                ),
+            Actions\RestoreAction::make()
+                ->successNotification(
+                    Notification::make()
+                        ->success()
+                        ->title('Estágio restaurado')
+                        ->body('O estágio foi restaurado com sucesso.')
+                ),
         ];
     }
 }

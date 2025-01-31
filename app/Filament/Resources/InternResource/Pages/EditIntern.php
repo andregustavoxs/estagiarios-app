@@ -4,8 +4,8 @@ namespace App\Filament\Resources\InternResource\Pages;
 
 use App\Filament\Resources\InternResource;
 use Filament\Actions;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Notifications\Notification;
 
 class EditIntern extends EditRecord
 {
@@ -15,21 +15,45 @@ class EditIntern extends EditRecord
     {
         return [
             Actions\DeleteAction::make()
-                ->before(function ($action) {
-                    if ($this->record->internships()->count() > 0) {
-                        Notification::make()
-                            ->danger()
-                            ->title('Ação bloqueada')
-                            ->body('Não é possível excluir este estagiário pois existem estágios vinculados a ele.')
-                            ->send();
-                        
-                        $action->cancel();
-                    }
-                }),
+                ->requiresConfirmation()
+                ->successNotification(
+                    Notification::make()
+                        ->success()
+                        ->title('Estagiário arquivado')
+                        ->body('O estagiário foi movido para a lixeira.')
+                ),
             Actions\ForceDeleteAction::make()
-                ->label('Excluir Permanentemente'),
+                ->requiresConfirmation()
+                ->modalDescription(function (Actions\ForceDeleteAction $action): string {
+                    $internshipsCount = $this->record->internships()->withTrashed()->count();
+                    
+                    if ($internshipsCount > 0) {
+                        $warning = $internshipsCount === 1
+                            ? 'Atenção: 1 estágio também será excluído permanentemente.'
+                            : "Atenção: {$internshipsCount} estágios também serão excluídos permanentemente.";
+                            
+                        return "Tem certeza que deseja excluir permanentemente este estagiário?\n\n{$warning}";
+                    }
+                    
+                    return 'Tem certeza que deseja excluir permanentemente este estagiário?';
+                })
+                ->modalIcon('heroicon-o-exclamation-triangle')
+                ->modalIconColor('warning')
+                ->modalHeading('Excluir Permanentemente')
+                ->closeModalByClickingAway(false)
+                ->successNotification(
+                    Notification::make()
+                        ->success()
+                        ->title('Estagiário excluído')
+                        ->body('O estagiário e seus estágios foram excluídos permanentemente.')
+                ),
             Actions\RestoreAction::make()
-                ->label('Restaurar'),
+                ->successNotification(
+                    Notification::make()
+                        ->success()
+                        ->title('Estagiário restaurado')
+                        ->body('O estagiário foi restaurado com sucesso.')
+                ),
         ];
     }
 
