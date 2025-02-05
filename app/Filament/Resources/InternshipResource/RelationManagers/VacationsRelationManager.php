@@ -9,9 +9,9 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Notifications\Notification;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Carbon\Carbon;
+use Filament\Notifications\Notification;
 
 class VacationsRelationManager extends RelationManager
 {
@@ -45,16 +45,54 @@ class VacationsRelationManager extends RelationManager
                                         $set('available_days', 30 - $totalDays);
                                     }),
 
-                                Forms\Components\TextInput::make('available_days')
-                                    ->label('Dias Disponíveis')
-                                    ->default(function () {
-                                        return 30 - $this->ownerRecord->vacations()
-                                            ->where('period', 1)
-                                            ->sum('days_taken');
+                                Forms\Components\TextInput::make('days_taken')
+                                    ->label('Dias de Férias')
+                                    ->numeric()
+                                    ->required()
+                                    ->minValue(1)
+                                    ->maxValue(function (Forms\Get $get) {
+                                        return $get('available_days') ?? 30;
                                     })
-                                    ->disabled()
+                                    ->default(1)
                                     ->suffix('dias')
-                                    ->numeric(),
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
+                                        // Get the previous valid value
+                                        $previousValue = (int) $get('days_taken');
+                                        
+                                        // Validate maximum days first
+                                        $maxDays = $get('available_days') ?? 30;
+                                        if ((int) $state > $maxDays) {
+                                            // Restore the previous value instead of using maxDays
+                                            $state = $previousValue;
+                                            $set('days_taken', $previousValue);
+                                            
+                                            Notification::make()
+                                                ->warning()
+                                                ->title('Limite de dias excedido')
+                                                ->body("O limite de {$maxDays} dias de férias foi atingido para este período.")
+                                                ->send();
+                                        }
+                                        
+                                        // Then calculate end date with the correct number of days
+                                        $startDate = $get('start_date');
+                                        if (!$startDate || !$state) return;
+                                        
+                                        // Subtract 1 from days since we're counting inclusively
+                                        $endDate = Carbon::parse($startDate)->addDays((int) $state - 1);
+                                        $set('end_date', $endDate->format('Y-m-d'));
+                                    })
+                                    ->validationMessages([
+                                        'max' => 'Você só possui :max dias disponíveis neste período.',
+                                        'required' => 'O número de dias é obrigatório.',
+                                        'min' => 'O número mínimo de dias é 1.',
+                                    ])
+                                    ->helperText(function (Forms\Get $get) {
+                                        $available = $get('available_days');
+                                        return $available !== null 
+                                            ? "Você possui {$available} dias disponíveis neste período."
+                                            : '';
+                                    }),
                             ]),
 
                         Forms\Components\Grid::make(2)
@@ -62,42 +100,46 @@ class VacationsRelationManager extends RelationManager
                                 Forms\Components\DatePicker::make('start_date')
                                     ->label('Data de Início')
                                     ->required()
-                                    ->format('d/m/Y')
+                                    ->format('Y-m-d')
                                     ->displayFormat('d/m/Y')
                                     ->native(false)
                                     ->placeholder('Selecione a data')
                                     ->prefixIcon('heroicon-m-calendar')
-                                    ->minDate(now()->startOfDay())
                                     ->closeOnDateSelection()
+                                    ->minDate(now()->startOfDay())
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
+                                        if (!$state) return;
+                                        
+                                        $days = $get('days_taken');
+                                        if (!$days) return;
+                                        
+                                        // Subtract 1 from days since we're counting inclusively
+                                        $endDate = Carbon::parse($state)->addDays((int) $days - 1);
+                                        $set('end_date', $endDate->format('Y-m-d'));
+                                    })
                                     ->validationMessages([
-                                        'min' => 'A data de início deve ser hoje ou uma data futura.',
+                                        'min_date' => 'A data de início deve ser hoje ou uma data futura.',
                                     ]),
 
                                 Forms\Components\DatePicker::make('end_date')
                                     ->label('Data de Término')
                                     ->required()
-                                    ->format('d/m/Y')
+                                    ->format('Y-m-d')
                                     ->displayFormat('d/m/Y')
                                     ->native(false)
-                                    ->placeholder('Selecione a data')
+                                    ->placeholder('Data calculada automaticamente')
                                     ->prefixIcon('heroicon-m-calendar')
-                                    ->minDate(function (Forms\Get $get) {
-                                        $startDate = $get('start_date');
-                                        return $startDate ? $startDate : now()->startOfDay();
-                                    })
-                                    ->closeOnDateSelection()
-                                    ->afterOrEqual('start_date')
-                                    ->validationMessages([
-                                        'after_or_equal' => 'A data de término deve ser posterior ou igual à data de início.',
-                                    ]),
+                                    ->disabled()
+                                    ->dehydrated(),
                             ]),
+
+                        Forms\Components\Hidden::make('available_days'),
 
                         Forms\Components\Textarea::make('observation')
                             ->label('Observação')
-                            ->placeholder('Digite alguma observação (opcional)')
-                            ->columnSpanFull()
-                            ->rows(3)
-                            ->maxLength(65535),
+                            ->placeholder('Digite alguma observação se necessário')
+                            ->columnSpanFull(),
                     ])
                     ->columns(1),
             ]);
