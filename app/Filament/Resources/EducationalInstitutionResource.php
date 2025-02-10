@@ -21,7 +21,7 @@ class EducationalInstitutionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
 
-    protected static ?string $modelLabel = 'Instituição de Ensino';
+    protected static ?string $navigationLabel = 'Instituição de Ensino';
 
     protected static ?string $pluralModelLabel = 'Instituições de Ensino';
 

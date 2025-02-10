@@ -25,9 +25,15 @@ class InternshipAgencyResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-building-office';
 
+    protected static ?string $navigationLabel = 'Agente de Integração';
+
+    protected static ?string $pluralModelLabel = 'Agentes de Integração';
+
     protected static ?string $modelLabel = 'Agente de Integração';
 
-    protected static ?string $pluralModelLabel = 'Agentes de Integrações';
+    protected static ?string $slug = 'agente-de-integracao';
+
+    protected static ?string $pluralLabel = 'Agentes de Integração';
 
     public static function form(Form $form): Form
     {
