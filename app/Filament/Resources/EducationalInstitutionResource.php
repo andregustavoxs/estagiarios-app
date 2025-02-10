@@ -265,7 +265,7 @@ class EducationalInstitutionResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListEducationalInstitutions::route('/'),
+            'index' => Pages\ListEducationalInstitution::route('/'),
             'create' => Pages\CreateEducationalInstitution::route('/create'),
             'edit' => Pages\EditEducationalInstitution::route('/{record}/edit'),
         ];

@@ -6,7 +6,7 @@ use App\Filament\Resources\EducationalInstitutionResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
     
-class ListEducationalInstitutions extends ListRecords
+class ListEducationalInstitution extends ListRecords
 {
     protected static string $resource = EducationalInstitutionResource::class;
 
