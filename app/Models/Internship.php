@@ -69,6 +69,11 @@ class Internship extends Model
         return $this->hasOne(CommitmentTerm::class);
     }
 
+    public function evaluations(): HasMany
+    {
+        return $this->hasMany(Evaluation::class);
+    }
+
     public function hasActiveVacation(): bool
     {
         return $this->vacations()

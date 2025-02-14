@@ -60,18 +60,69 @@ class CommitmentTermRelationManager extends RelationManager
                             ]),
                     ]),
 
-                Forms\Components\Section::make('Documento')
-                    ->description('Upload do termo de compromisso assinado')
-                    ->schema([
-                        Forms\Components\FileUpload::make('document_path')
-                            ->label('Termo de Compromisso')
-                            ->directory('commitment-terms')
-                            ->acceptedFileTypes(['application/pdf'])
-                            ->helperText('Faça upload do termo de compromisso em formato PDF.'),
-                    ])
+                    Forms\Components\Section::make('Documento')
+                        ->description('Upload do termo de compromisso assinado')
+                        ->schema([
+                            Forms\Components\FileUpload::make('document_path')
+                                ->label('Termo de Compromisso')
+                                ->acceptedFileTypes(['application/pdf'])
+                                ->helperText('Faça upload do termo de compromisso em formato PDF.')
+                                ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                    if (!$state) return;
+
+                                    $file = $state;
+
+                                    $client = new \GuzzleHttp\Client();
+
+                                    try {
+                                        $response = $client->post('https://int.tce.ma.gov.br/s3aws/api/files/upload', [
+                                            'multipart' => [
+                                                [
+                                                    'name' => 'file',
+                                                    'contents' => fopen($file->getRealPath(), 'r'),
+                                                    'filename' => $file->getClientOriginalName()
+                                                ],
+                                                [
+                                                    'name' => 'bucketName',
+                                                    'contents' => 'teste.tcema.tc.br'
+                                                ],
+                                                [
+                                                    'name' => 'pathWithoutFilename',
+                                                    'contents' => 'termo_compromisso'
+                                                ],
+                                                [
+                                                    'name' => 'filename',
+                                                    'contents' => $file->getClientOriginalName()
+                                                ]
+                                            ]
+                                        ]);
+
+                                        $result = json_decode($response->getBody()->getContents(), true);
+
+
+                                        // Mantém o estado original do arquivo e salva o filePath em um campo separado
+                                        return $result['filePath'] ?? null;
+
+                                    } catch (\Exception $e) {
+                                        \Illuminate\Support\Facades\Log::error('Erro ao fazer upload do arquivo:', [
+                                            'error' => $e->getMessage(),
+                                            'trace' => $e->getTraceAsString()
+                                        ]);
+
+                                        \Filament\Notifications\Notification::make()
+                                            ->danger()
+                                            ->title('Erro ao fazer upload')
+                                            ->body($e->getMessage())
+                                            ->send();
+
+                                        return null;
+                                    }
+                                }),
+                            Forms\Components\Hidden::make('document_path'),
+                        ])
                     ->hidden(function (Forms\Get $get) {
-                        return !($get('intern_signature') && 
-                               $get('court_signature') && 
+                        return !($get('intern_signature') &&
+                               $get('court_signature') &&
                                $get('institution_signature'));
                     }),
 
