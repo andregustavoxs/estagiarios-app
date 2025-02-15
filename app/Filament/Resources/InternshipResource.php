@@ -217,6 +217,7 @@ class InternshipResource extends Resource
         return [
             RelationManagers\VacationsRelationManager::class,
             RelationManagers\CommitmentTermRelationManager::class,
+            RelationManagers\EvaluationsRelationManager::class,
         ];
     }
 
