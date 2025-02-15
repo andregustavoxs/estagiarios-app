@@ -20,9 +20,15 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class InternshipResource extends Resource
 {
     protected static ?string $model = Internship::class;
+
     protected static ?string $modelLabel = 'Estágio';
+
     protected static ?string $pluralModelLabel = 'Estágios';
+
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+
+    protected static ?string $slug = 'estagios';
+
     protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
@@ -68,21 +74,23 @@ class InternshipResource extends Resource
                                 ->schema([
                                     Forms\Components\DatePicker::make('start_date')
                                         ->label('Data de Início')
-                                        ->helperText('Selecione a Data de Início do Estágio')
                                         ->required()
-//                                        ->native(false)
                                         ->displayFormat('d/m/Y')
+                                        ->format('Y-m-d')
                                         ->closeOnDateSelection()
                                         ->live()
                                         ->afterStateUpdated(function ($state, Forms\Set $set) {
-                                            $set('end_date', null);
+                                            if ($state) {
+                                                $endDate = \Carbon\Carbon::parse($state)->addMonths(6);
+                                                $set('end_date', $endDate->format('Y-m-d'));
+                                            }
                                         }),
 
                                     Forms\Components\DatePicker::make('end_date')
                                         ->label('Data de Término')
                                         ->required()
-//                                        ->native(false)
                                         ->displayFormat('d/m/Y')
+                                        ->format('Y-m-d')
                                         ->closeOnDateSelection()
                                         ->minDate(fn(Forms\Get $get) => $get('start_date'))
                                         ->helperText('A data de término deve ser posterior à data de início'),
@@ -215,9 +223,10 @@ class InternshipResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\VacationsRelationManager::class,
             RelationManagers\CommitmentTermRelationManager::class,
             RelationManagers\EvaluationsRelationManager::class,
+            RelationManagers\AddendumsRelationManager::class,
+            RelationManagers\VacationsRelationManager::class,
         ];
     }
 

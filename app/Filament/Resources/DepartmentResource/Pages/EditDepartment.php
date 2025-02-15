@@ -30,10 +30,15 @@ class EditDepartment extends EditRecord
                                 ->body('Não é possível excluir este setor pois existem supervisores vinculados a ele.')
                                 ->send();
                         }
-                        
+
                         $action->cancel();
                     }
                 }),
         ];
+    }
+
+    protected function afterSave(): void
+    {
+        $this->redirect($this->getResource()::getUrl('index'));
     }
 }

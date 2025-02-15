@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\InternshipResource\RelationManagers;
 
-use App\Models\InternEvaluation;
+use App\Models\InternAddendum;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -10,62 +10,63 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Filament\Support\Colors\Color;
-use Filament\Support\Enums\IconPosition;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class EvaluationsRelationManager extends RelationManager
+class AddendumsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'evaluations';
+    protected static string $relationship = 'addendums';
 
-    protected static ?string $title = 'Avaliações';
+    protected static ?string $title = 'Termos Aditivos';
 
-    protected static ?string $pluralModelLabel = 'Avaliações';
+    protected static ?string $modelLabel = 'Termo Aditivo';
 
-    protected static ?string $modelLabel = 'Avaliação';
+    protected static ?string $pluralModelLabel = 'Termos Aditivos';
 
-    protected static ?string $recordTitleAttribute = 'evaluation_type';
+    protected static ?string $recordTitleAttribute = 'addendum_type';
 
+    public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
+    {
+        return $ownerRecord->hasFirstEvaluation();
+    }
 
     public function form(Form $form): Form
     {
         return $form
             ->schema([
-               Forms\Components\Section::make()
+                Forms\Components\Section::make()
                     ->schema([
-                        Forms\Components\Select::make('evaluation_number')
-                            ->label('Tipo de Avaliação')
+                        Forms\Components\Select::make('addendum_number')
+                            ->label('Tipo de Aditivo')
                             ->options([
-                                1 => '1ª Avaliação',
-                                2 => '2ª Avaliação',
-                                3 => '3ª Avaliação',
-                                4 => '4ª Avaliação',
+                                1 => '1º Aditivo',
+                                2 => '2º Aditivo',
+                                3 => '3º Aditivo',
                             ])
                             ->required()
                             ->native(false)
                             ->rules(fn ($record) => [
-                                "unique:intern_evaluations,evaluation_number,{$record?->id},id,internship_id,{$this->ownerRecord->id}"
+                                "unique:intern_addendums,addendum_number,{$record?->id},id,internship_id,{$this->ownerRecord->id}"
                             ])
                             ->validationMessages([
-                                'unique' => 'Esta avaliação já foi registrada.',
+                                'unique' => 'Este aditivo já foi registrado.',
                             ]),
 
                         Forms\Components\FileUpload::make('pdf_path')
-                            ->label('PDF da Avaliação')
-                            ->directory('evaluations')
+                            ->label('PDF do Aditivo')
+                            ->directory('addendums')
                             ->acceptedFileTypes(['application/pdf'])
                             ->maxSize(5120) // 5MB
                             ->downloadable()
                             ->openable()
-                            ->required()
                             ->validationMessages([
-                                'required' => 'O PDF da avaliação é obrigatório.',
+                                'required' => 'O PDF do aditivo é obrigatório.',
                                 'max' => 'O arquivo não pode ter mais que 5MB.',
                                 'mimes' => 'O arquivo deve ser um PDF.',
                             ]),
 
                         Forms\Components\Toggle::make('is_completed')
-                            ->label('Avaliação Concluída')
+                            ->label('Aditivo Concluído')
                             ->default(false)
                             ->live()
                             ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
@@ -74,16 +75,10 @@ class EvaluationsRelationManager extends RelationManager
                                     Notification::make()
                                         ->warning()
                                         ->title('PDF Obrigatório')
-                                        ->body('Você precisa anexar o PDF da avaliação antes de marcá-la como concluída.')
+                                        ->body('Você precisa anexar o PDF do aditivo antes de marcá-lo como concluído.')
                                         ->send();
                                 }
                             }),
-
-                        Forms\Components\View::make('filament.forms.components.template-link')
-                            ->label('')
-                            ->viewData([
-                                'url' => '/admin/modelo-de-avaliacao',
-                            ]),
                     ]),
             ]);
     }
@@ -91,8 +86,8 @@ class EvaluationsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         $internship = $this->ownerRecord;
-        $totalEvaluations = InternEvaluation::where('internship_id', $internship->id)->count();
-        $completedEvaluations = InternEvaluation::where('internship_id', $internship->id)
+        $totalAddendums = InternAddendum::where('internship_id', $internship->id)->count();
+        $completedAddendums = InternAddendum::where('internship_id', $internship->id)
             ->where('is_completed', true)
             ->count();
 
@@ -103,22 +98,19 @@ class EvaluationsRelationManager extends RelationManager
         );
 
         $progressIndicators = array_map(
-            fn ($i) => $i <= $completedEvaluations ? '●' : '○',
-            range(1, 4)
+            fn ($i) => $i <= $completedAddendums ? '●' : '○',
+            range(1, 3)
         );
 
         return $table
             ->headerActions([
-                Tables\Actions\CreateAction::make()
-                    ->after(function () {
-                        return redirect(request()->header('Referer'));
-                    }),
+                Tables\Actions\CreateAction::make(),
             ])
-            ->description(fn () => "{$period} • " . implode(' ', $progressIndicators) . " ({$completedEvaluations}/4 Avaliações Concluídas)")
+            ->description(fn () => "{$period} • " . implode(' ', $progressIndicators) . " ({$completedAddendums}/3 Aditivos Concluídos)")
             ->columns([
-                Tables\Columns\TextColumn::make('evaluation_type')
+                Tables\Columns\TextColumn::make('addendum_type')
                     ->label('Tipo')
-                    ->sortable(['evaluation_number']),
+                    ->sortable(['addendum_number']),
 
                 Tables\Columns\IconColumn::make('is_completed')
                     ->label('Status')
@@ -129,17 +121,14 @@ class EvaluationsRelationManager extends RelationManager
                     ->falseColor(Color::Red),
 
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Registrada em')
+                    ->label('Registrado em')
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
             ])
-            ->defaultSort('evaluation_number')
+            ->defaultSort('addendum_number')
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()
-                    ->after(function () {
-                        return redirect(request()->header('Referer'));
-                    }),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

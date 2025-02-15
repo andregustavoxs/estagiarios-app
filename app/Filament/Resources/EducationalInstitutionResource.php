@@ -25,6 +25,12 @@ class EducationalInstitutionResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Instituições de Ensino';
 
+    protected static ?string $modelLabel = 'Instituição de Ensino';
+
+    protected static ?string $slug = 'instituicao-de-ensino';
+
+    protected static ?string $pluralLabel = 'Instituições de Ensino';
+
     public static function form(Form $form): Form
     {
         return $form

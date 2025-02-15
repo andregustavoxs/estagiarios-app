@@ -74,11 +74,24 @@ class Internship extends Model
         return $this->hasOne(CommitmentTerm::class);
     }
 
+    public function addendums(): HasMany
+    {
+        return $this->hasMany(InternAddendum::class);
+    }
+
     public function hasActiveVacation(): bool
     {
         return $this->vacations()
             ->whereDate('start_date', '<=', now())
             ->whereDate('end_date', '>=', now())
+            ->exists();
+    }
+
+    public function hasFirstEvaluation(): bool
+    {
+        return $this->evaluations()
+            ->where('evaluation_number', 1)
+            ->where('is_completed', true)
             ->exists();
     }
 }

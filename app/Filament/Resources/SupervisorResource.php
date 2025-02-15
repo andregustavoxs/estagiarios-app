@@ -22,6 +22,8 @@ class SupervisorResource extends Resource
 
     protected static ?string $modelLabel = 'Supervisor';
 
+    protected static ?string $slug = 'supervisores';
+
     protected static ?string $pluralModelLabel = 'Supervisores';
 
     public static function form(Form $form): Form

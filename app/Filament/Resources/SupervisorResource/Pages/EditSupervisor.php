@@ -22,10 +22,15 @@ class EditSupervisor extends EditRecord
                             ->title('Ação bloqueada')
                             ->body('Não é possível excluir este supervisor pois existem estagiários vinculados a ele.')
                             ->send();
-                        
+
                         $action->cancel();
                     }
                 }),
         ];
+    }
+
+    protected function afterSave(): void
+    {
+        $this->redirect($this->getResource()::getUrl('index'));
     }
 }
