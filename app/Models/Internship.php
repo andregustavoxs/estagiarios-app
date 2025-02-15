@@ -64,6 +64,11 @@ class Internship extends Model
         return $this->hasMany(InternVacation::class);
     }
 
+    public function evaluations(): HasMany
+    {
+        return $this->hasMany(InternEvaluation::class);
+    }
+
     public function commitmentTerm(): HasOne
     {
         return $this->hasOne(CommitmentTerm::class);
