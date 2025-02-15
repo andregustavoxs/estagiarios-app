@@ -26,15 +26,15 @@ class EditIntern extends EditRecord
                 ->requiresConfirmation()
                 ->modalDescription(function (Actions\ForceDeleteAction $action): string {
                     $internshipsCount = $this->record->internships()->withTrashed()->count();
-                    
+
                     if ($internshipsCount > 0) {
                         $warning = $internshipsCount === 1
                             ? 'Atenção: 1 estágio também será excluído permanentemente.'
                             : "Atenção: {$internshipsCount} estágios também serão excluídos permanentemente.";
-                            
+
                         return "Tem certeza que deseja excluir permanentemente este estagiário?\n\n{$warning}";
                     }
-                    
+
                     return 'Tem certeza que deseja excluir permanentemente este estagiário?';
                 })
                 ->modalIcon('heroicon-o-exclamation-triangle')
@@ -57,8 +57,13 @@ class EditIntern extends EditRecord
         ];
     }
 
-    public function getTitle(): string 
+    public function getTitle(): string
     {
         return 'Editar Estagiário';
+    }
+
+    protected function afterSave(): void
+    {
+        $this->redirect($this->getResource()::getUrl('index'));
     }
 }

@@ -24,6 +24,8 @@ class DepartmentResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Setores';
 
+    protected static ?string $slug = 'setor';
+
     public static function form(Form $form): Form
     {
         return $form

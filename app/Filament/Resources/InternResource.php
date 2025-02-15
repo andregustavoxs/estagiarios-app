@@ -17,9 +17,15 @@ use Filament\Notifications\Notification;
 class InternResource extends Resource
 {
     protected static ?string $model = Intern::class;
+
     protected static ?string $modelLabel = 'Estagiário';
+
     protected static ?string $pluralModelLabel = 'Estagiários';
+
     protected static ?string $navigationIcon = 'heroicon-o-users';
+
+    protected static ?string $slug = 'estagiarios';
+
     protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form

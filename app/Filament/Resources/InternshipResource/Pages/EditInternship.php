@@ -51,4 +51,9 @@ class EditInternship extends EditRecord
                 ),
         ];
     }
+
+    protected function afterSave(): void
+    {
+        $this->redirect($this->getResource()::getUrl('index'));
+    }
 }

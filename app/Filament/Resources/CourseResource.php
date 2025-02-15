@@ -27,6 +27,8 @@ class CourseResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Cursos';
 
+    protected static ?string $slug = 'cursos';
+
     public static function getNavigationBadge(): ?string
     {
         $totalVacancies = Course::sum('vacancies');
@@ -72,10 +74,10 @@ class CourseResource extends Resource
                                     ->live()
                                     ->afterStateUpdated(function ($state, Get $get, Forms\Components\TextInput $component) {
                                         $record = $component->getRecord();
-                                        
+
                                         if ($record) {
                                             $currentInterns = $record->interns()->count();
-                                            
+
                                             if ($state < $currentInterns) {
                                                 $component->state($record->vacancies);
                                                 Notification::make()
@@ -147,7 +149,7 @@ class CourseResource extends Resource
                                 ->title('Ação bloqueada')
                                 ->body('Não é possível excluir este curso pois existem estagiários vinculados a ele.')
                                 ->send();
-                            
+
                             $action->cancel();
                         }
                     }),
@@ -164,7 +166,7 @@ class CourseResource extends Resource
                                         ->title('Ação bloqueada')
                                         ->body('Não é possível excluir cursos que possuem estagiários vinculados.')
                                         ->send();
-                                    
+
                                     $action->cancel();
                                     return;
                                 }
@@ -173,14 +175,14 @@ class CourseResource extends Resource
                 ]),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
             RelationManagers\InternsRelationManager::class,
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [
@@ -188,5 +190,5 @@ class CourseResource extends Resource
             'create' => Pages\CreateCourse::route('/create'),
             'edit' => Pages\EditCourse::route('/{record}/edit'),
         ];
-    }    
+    }
 }
