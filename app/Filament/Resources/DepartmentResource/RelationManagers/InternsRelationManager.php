@@ -115,6 +115,7 @@ class InternsRelationManager extends RelationManager
                                         ->helperText('Supervisor responsável')
                                         ->columnSpan(1)
                                         ->prefixIcon('heroicon-o-user'),
+
                                     Forms\Components\Select::make('educational_institution_id')
                                         ->relationship('educationalInstitution', 'trade_name')
                                         ->label('Instituição de Ensino')
@@ -122,6 +123,19 @@ class InternsRelationManager extends RelationManager
                                         ->placeholder('Selecione a instituição de ensino do estagiário')
                                         ->helperText('Instituição responsável pelo estagiário')
                                         ->prefixIcon('heroicon-o-building-library'),
+
+                                    Forms\Components\Select::make('education_level')
+                                        ->label('Nível de Formação')
+                                        ->options([
+                                            'postgraduate' => 'Pós-Graduação',
+                                            'higher_education' => 'Ensino Superior',
+                                            'technical' => 'Ensino Técnico',
+                                        ])
+                                        ->required()
+                                        ->disabled()
+                                        ->placeholder('Selecione o nível de formação')
+                                        ->helperText('Nível de formação do estagiário')
+                                        ->prefixIcon('heroicon-o-academic-cap'),
                                 ]),
                         ]),
                 ])->columnSpan('full'),
@@ -131,33 +145,42 @@ class InternsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with('intern'))
+            ->modifyQueryUsing(fn(Builder $query) => $query->with('intern.internships'))
             ->recordTitleAttribute('intern.name')
-            ->heading(fn ($livewire) => 'Estagiários alocados no setor ' . $livewire->getOwnerRecord()->acronym)
-            ->description('Lista de estagiários alocados neste setor')
+            ->heading(fn($livewire) => 'Estagiários do curso de '.$livewire->getOwnerRecord()->name)
+            ->description('Lista de estagiários matriculados neste curso')
             ->columns([
                 Tables\Columns\TextColumn::make('intern.name')
-                    ->label('Nome')
-                    ->searchable()
-                    ->sortable()
-                    ->weight('bold')
-                    ->icon('heroicon-m-user'),
-                Tables\Columns\TextColumn::make('intern.internships.department.acronym')
-                    ->label('Setor')
-                    ->searchable()
-                    ->badge(),
-                Tables\Columns\TextColumn::make('intern.internships.course.name')
-                    ->label('Curso')
-                    ->searchable()
-                    ->icon('heroicon-m-academic-cap'),
-                Tables\Columns\TextColumn::make('intern.internships.educationalInstitution.trade_name')
-                    ->label('Instituição de Ensino')
-                    ->searchable()
-                    ->icon('heroicon-m-building-library'),
-                Tables\Columns\TextColumn::make('intern.internships.supervisor.name')
-                    ->label('Supervisor')
-                    ->searchable()
-                    ->icon('heroicon-m-user'),
+                ->label('Nome')
+                ->searchable()
+                ->sortable()
+                ->weight('bold')
+                ->icon('heroicon-m-user'),
+            Tables\Columns\TextColumn::make('intern.internships.department.acronym')
+                ->label('Setor')
+                ->searchable()
+                ->badge(),
+            Tables\Columns\TextColumn::make('intern.internships.course.name')
+                ->label('Curso')
+                ->searchable()
+                ->icon('heroicon-m-academic-cap'),
+            Tables\Columns\TextColumn::make('intern.internships.educationalInstitution.trade_name')
+                ->label('Instituição de Ensino')
+                ->searchable()
+                ->icon('heroicon-m-building-library'),
+            Tables\Columns\TextColumn::make('intern.internships.education_level')
+                ->label('Nível de Formação')
+                ->formatStateUsing(fn (string $state): string => match ($state) {
+                    'postgraduate' => 'Pós-Graduação',
+                    'higher_education' => 'Ensino Superior',
+                    'technical' => 'Ensino Técnico',
+                    default => $state,
+                })
+                ->sortable(),
+            Tables\Columns\TextColumn::make('intern.internships.supervisor.name')
+                ->label('Supervisor')
+                ->searchable()
+                ->icon('heroicon-m-user'),
             ])
             ->defaultSort('intern.name', 'asc')
             ->striped()
@@ -168,7 +191,8 @@ class InternsRelationManager extends RelationManager
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
-                    ->label('Visualizar'),
+                    ->label('Visualizar')
+                    ->icon('heroicon-m-eye'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -18,6 +18,7 @@ class InternsRelationManager extends RelationManager
     protected static ?string $title = 'Estagiários';
 
     protected static ?string $modelLabel = 'Estagiário';
+
     protected static ?string $pluralModelLabel = 'Estagiários';
 
     public function form(Form $form): Form
@@ -122,6 +123,19 @@ class InternsRelationManager extends RelationManager
                                         ->placeholder('Selecione a instituição de ensino do estagiário')
                                         ->helperText('Instituição responsável pelo estagiário')
                                         ->prefixIcon('heroicon-o-building-library'),
+
+                                    Forms\Components\Select::make('education_level')
+                                        ->label('Nível de Formação')
+                                        ->options([
+                                            'postgraduate' => 'Pós-Graduação',
+                                            'higher_education' => 'Ensino Superior',
+                                            'technical' => 'Ensino Técnico',
+                                        ])
+                                        ->required()
+                                        ->disabled()
+                                        ->placeholder('Selecione o nível de formação')
+                                        ->helperText('Nível de formação do estagiário')
+                                        ->prefixIcon('heroicon-o-academic-cap'),
                                 ]),
                         ]),
                 ])->columnSpan('full'),
@@ -154,6 +168,15 @@ class InternsRelationManager extends RelationManager
                 ->label('Instituição de Ensino')
                 ->searchable()
                 ->icon('heroicon-m-building-library'),
+            Tables\Columns\TextColumn::make('intern.internships.education_level')
+                ->label('Nível de Formação')
+                ->formatStateUsing(fn (string $state): string => match ($state) {
+                    'postgraduate' => 'Pós-Graduação',
+                    'higher_education' => 'Ensino Superior',
+                    'technical' => 'Ensino Técnico',
+                    default => $state,
+                })
+                ->sortable(),
             Tables\Columns\TextColumn::make('intern.internships.supervisor.name')
                 ->label('Supervisor')
                 ->searchable()
