@@ -95,8 +95,7 @@ class InternshipResource extends Resource
                                         ->minDate(fn(Forms\Get $get) => $get('start_date'))
                                         ->helperText('A data de término deve ser posterior à data de início'),
                                 ]),
-                        ])
-                        ->columns(2),
+                        ])->columns(2),
 
 
                     Forms\Components\Wizard\Step::make('Vinculação Institucional')
@@ -157,10 +156,17 @@ class InternshipResource extends Resource
                                 ->searchable()
                                 ->preload()
                                 ->helperText('Instituição educacional responsável'),
-                        ])
-                        ->columns(2)
-                ])
-                    ->columnSpan('full')
+
+                            Forms\Components\Select::make('education_level')
+                                ->label('Nível de Formação')
+                                ->options([
+                                    'postgraduate' => 'Pós-Graduação',
+                                    'higher_education' => 'Ensino Superior',
+                                    'technical' => 'Ensino Técnico',
+                                ])
+                                ->required(),
+                        ])->columns(2)
+                ])->columnSpanFull()
             ]);
     }
 
