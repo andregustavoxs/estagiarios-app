@@ -22,9 +22,6 @@ return new class extends Migration {
             $table->string('neighborhood')->nullable();
             $table->string('city')->nullable();
             $table->string('uf', 2)->nullable();
-            $table->string('agreement_number')->unique(); // nº do convênio
-            $table->date('agreement_validity_start'); // período de validade do convênio (start date)
-            $table->date('agreement_validity_end'); // período de validade do convênio (end date)
             $table->timestamps();
         });
     }

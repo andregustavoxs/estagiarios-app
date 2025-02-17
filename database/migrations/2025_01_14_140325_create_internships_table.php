@@ -17,6 +17,8 @@ return new class extends Migration
             $table->foreignId('educational_institution_id')->constrained()->restrictOnDelete()->cascadeOnUpdate();
             $table->string('registration_number')->unique();
             $table->enum('education_level', ['postgraduate', 'higher_education', 'technical'])->required();
+            $table->time('schedule_start')->nullable();
+            $table->time('schedule_end')->nullable();
             $table->timestamps();
         });
     }

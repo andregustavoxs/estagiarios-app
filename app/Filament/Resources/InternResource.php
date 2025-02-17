@@ -24,9 +24,11 @@ class InternResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
+    protected static ?string $navigationGroup = 'Estágios';
+
     protected static ?string $slug = 'estagiarios';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
@@ -35,7 +37,6 @@ class InternResource extends Resource
                 Forms\Components\Grid::make(3)
                     ->schema([
                         Forms\Components\Section::make('Informações Pessoais')
-                            ->description('Informações básicas do estagiário')
                             ->icon('heroicon-o-user')
                             ->columnSpan(2)
                             ->schema([
@@ -70,7 +71,6 @@ class InternResource extends Resource
                             ]),
 
                         Forms\Components\Section::make('Foto')
-                            ->description('Foto de identificação do estagiário')
                             ->icon('heroicon-o-camera')
                             ->columnSpan(1)
                             ->schema([

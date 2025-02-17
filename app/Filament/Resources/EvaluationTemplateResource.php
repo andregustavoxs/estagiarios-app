@@ -19,6 +19,8 @@ class EvaluationTemplateResource extends Resource
 
     protected static ?string $navigationGroup = 'Modelos';
 
+    protected static ?int $navigationSort = 3;
+
     protected static ?string $navigationLabel = 'Modelo de Avaliação';
 
     protected static ?string $pluralModelLabel = 'Modelos de Avaliação';
@@ -46,7 +48,7 @@ class EvaluationTemplateResource extends Resource
                             ->placeholder('Ex: Formulário de Avaliação 2025')
                             ->helperText('Digite um nome descritivo para identificar este modelo')
                             ->columnSpanFull(),
-                            
+
                         Forms\Components\FileUpload::make('file_path')
                             ->label('Modelo de Avaliação PDF')
                             ->required()
@@ -58,7 +60,7 @@ class EvaluationTemplateResource extends Resource
                             ->columnSpanFull()
                             ->preserveFilenames()
                             ->previewable(),
-                            
+
                         Forms\Components\RichEditor::make('description')
                             ->label('Descrição')
                             ->maxLength(65535)

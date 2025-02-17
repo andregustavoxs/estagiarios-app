@@ -31,13 +31,16 @@ class EducationalInstitutionResource extends Resource
 
     protected static ?string $pluralLabel = 'Instituições de Ensino';
 
+    protected static ?string $navigationGroup = 'Cadastros Básicos';
+
+    protected static ?int $navigationSort = 1;
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\Wizard::make([
                     Forms\Components\Wizard\Step::make('Informações da Instituição de Ensino')
-                        ->description('Dados cadastrais da instituição de ensino')
                         ->icon('heroicon-o-academic-cap')
                         ->schema([
                             Forms\Components\Grid::make(2)
@@ -47,7 +50,6 @@ class EducationalInstitutionResource extends Resource
                                         ->required()
                                         ->maxLength(255)
                                         ->placeholder('Digite a razão social da instituição de ensino')
-                                        ->helperText('Nome oficial registrado da instituição de ensino')
                                         ->prefixIcon('heroicon-o-academic-cap')
                                         ->unique(ignoreRecord: true)
                                         ->validationMessages([
@@ -60,7 +62,6 @@ class EducationalInstitutionResource extends Resource
                                         ->required()
                                         ->maxLength(255)
                                         ->placeholder('Digite o nome fantasia')
-                                        ->helperText('Nome comercial ou marca da instituição de ensino')
                                         ->prefixIcon('heroicon-o-building-storefront')
                                         ->unique(ignoreRecord: true)
                                         ->validationMessages([
@@ -73,7 +74,6 @@ class EducationalInstitutionResource extends Resource
                                         ->maxLength(18)
                                         ->mask('99.999.999/9999-99')
                                         ->placeholder('00.000.000/0000-00')
-                                        ->helperText('CNPJ da instituição de ensino (apenas números)')
                                         ->prefixIcon('heroicon-o-identification')
                                         ->unique(ignoreRecord: true)
                                         ->validationMessages([
@@ -83,7 +83,6 @@ class EducationalInstitutionResource extends Resource
                         ]),
 
                     Forms\Components\Wizard\Step::make('Informações de Contato')
-                        ->description('Dados para contato com a instituição de ensino')
                         ->icon('heroicon-o-phone')
                         ->schema([
                             Forms\Components\Grid::make(2)
@@ -94,7 +93,6 @@ class EducationalInstitutionResource extends Resource
                                         ->maxLength(20)
                                         ->mask('(99) 99999-9999')
                                         ->placeholder('(00) 00000-0000')
-                                        ->helperText('Telefone principal para contato')
                                         ->prefixIcon('heroicon-o-phone'),
 
                                     Forms\Components\TextInput::make('contact_person')
@@ -102,13 +100,11 @@ class EducationalInstitutionResource extends Resource
                                         ->required()
                                         ->maxLength(255)
                                         ->placeholder('Nome da pessoa responsável')
-                                        ->helperText('Nome do responsável pelo contato')
                                         ->prefixIcon('heroicon-o-user'),
                                 ]),
                         ]),
 
                     Forms\Components\Wizard\Step::make('Endereço')
-                        ->description('Informações de localização da instituição')
                         ->icon('heroicon-o-map-pin')
                         ->schema([
                             Forms\Components\TextInput::make('postal_code')
@@ -116,7 +112,6 @@ class EducationalInstitutionResource extends Resource
                                 ->mask('99999-999')
                                 ->placeholder('00000-000')
                                 ->prefixIcon('heroicon-o-map')
-                                ->helperText('Digite o CEP para autocompletar o endereço')
                                 ->live(onBlur: true)
                                 ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set, ?string $state) {
                                     if (!$state) {

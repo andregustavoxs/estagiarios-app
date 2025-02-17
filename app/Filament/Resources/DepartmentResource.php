@@ -26,6 +26,10 @@ class DepartmentResource extends Resource
 
     protected static ?string $slug = 'setor';
 
+    protected static ?string $navigationGroup = 'Cadastros Básicos';
+
+    protected static ?int $navigationSort = 1;
+
     public static function form(Form $form): Form
     {
         return $form
@@ -63,25 +67,6 @@ class DepartmentResource extends Resource
                                         'unique' => 'Esta sigla já está em uso.',
                                     ]),
                             ]),
-                        Forms\Components\Grid::make(2)
-                            ->schema([
-                                Forms\Components\TextInput::make('extension')
-                                    ->label('Ramal')
-                                    ->required()
-                                    ->numeric()
-                                    ->length(4)
-                                    ->maxLength(4)
-                                    ->mask('9999')
-                                    ->placeholder('Ex: 1234')
-                                    ->helperText('Ramal do setor (4 dígitos)')
-                                    ->prefixIcon('heroicon-o-phone')
-                                    ->unique(ignoreRecord: true)
-                                    ->validationMessages([
-                                        'unique' => 'Este ramal já está em uso.',
-                                        'numeric' => 'O ramal deve conter apenas números.',
-                                        'length' => 'O ramal deve ter exatamente 4 dígitos.',
-                                    ])
-                            ]),
                     ]),
             ]);
     }
@@ -96,6 +81,7 @@ class DepartmentResource extends Resource
                     ->sortable()
                     ->weight('bold')
                     ->icon('heroicon-m-building-office'),
+
                 Tables\Columns\TextColumn::make('acronym')
                     ->label('Sigla')
                     ->searchable()
@@ -103,16 +89,24 @@ class DepartmentResource extends Resource
                     ->badge()
                     ->color('primary')
                     ->formatStateUsing(fn(string $state): string => strtoupper($state)),
+
+                Tables\Columns\TextColumn::make('extensions.extension')
+                    ->label('Ramal')
+                    ->searchable()
+                    ->sortable()
+                    ->badge()
+                    ->color('primary')
+                    ->state(function ($record) {
+                        return $record->extensions()->oldest()->first()?->extension;
+                    }),
+
                 Tables\Columns\TextColumn::make('supervisors.name')
                     ->label('Supervisor')
                     ->searchable()
                     ->sortable()
                     ->weight('bold')
                     ->icon('heroicon-m-user'),
-                Tables\Columns\TextColumn::make('extension')
-                    ->label('Ramal')
-                    ->searchable()
-                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('interns_count')
                     ->label('Qtd. Estagiários')
                     ->counts('interns')
@@ -165,6 +159,7 @@ class DepartmentResource extends Resource
     {
         return [
             RelationManagers\InternsRelationManager::class,
+            RelationManagers\ExtensionsRelationManager::class,
         ];
     }
 

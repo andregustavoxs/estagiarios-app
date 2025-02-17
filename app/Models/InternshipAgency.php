@@ -38,6 +38,11 @@ class InternshipAgency extends Model
         return $this->hasMany(Internship::class);
     }
 
+    public function agreements(): HasMany
+    {
+        return $this->hasMany(Agreement::class);
+    }
+
     public function interns(): HasManyThrough
     {
         return $this->hasManyThrough(
