@@ -15,6 +15,7 @@ class Course extends Model
     protected $fillable = [
         'name',
         'vacancies',
+        'education_level',
     ];
 
     public function interns(): HasMany

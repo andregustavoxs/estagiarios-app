@@ -27,9 +27,11 @@ class InternshipResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
 
-    protected static ?string $slug = 'estagios';
+    protected static ?string $navigationGroup = 'Estágios';
 
     protected static ?int $navigationSort = 2;
+
+    protected static ?string $slug = 'estagios';
 
     public static function form(Form $form): Form
     {
@@ -38,7 +40,6 @@ class InternshipResource extends Resource
                 Forms\Components\Wizard::make([
                     Forms\Components\Wizard\Step::make('Informações do Estágio')
                         ->icon('heroicon-o-user')
-                        ->description('Informações Básicas do Estágio')
                         ->schema([
                             Forms\Components\Select::make('intern_id')
                                 ->relationship('intern', 'name')
@@ -95,43 +96,60 @@ class InternshipResource extends Resource
                                         ->minDate(fn(Forms\Get $get) => $get('start_date'))
                                         ->helperText('A data de término deve ser posterior à data de início'),
                                 ]),
+
+                            Forms\Components\Grid::make(2)
+                                ->schema([
+                                    Forms\Components\TimePicker::make('schedule_start')
+                                        ->label('Horário de Início')
+                                        ->required()
+                                        ->seconds(false)
+                                        ->displayFormat('H:i')
+                                        ->native(false)
+                                        ->prefixIcon('heroicon-o-clock')
+                                        ->helperText('Horário de início do estágio'),
+
+                                    Forms\Components\TimePicker::make('schedule_end')
+                                        ->label('Horário de Término')
+                                        ->required()
+                                        ->seconds(false)
+                                        ->displayFormat('H:i')
+                                        ->native(false)
+                                        ->prefixIcon('heroicon-o-clock')
+                                        ->helperText('Horário de término do estágio')
+                                        ->after('schedule_start'),
+                                ]),
                         ])->columns(2),
 
 
                     Forms\Components\Wizard\Step::make('Vinculação Institucional')
-                        ->description('Vínculo institucional do estágio')
                         ->icon('heroicon-o-building-office')
                         ->schema([
                             Forms\Components\Select::make('course_id')
-                                ->label('Curso')
                                 ->relationship('course', 'name')
+                                ->label('Curso')
                                 ->required()
-                                ->live()
                                 ->searchable()
                                 ->preload()
+                                ->live()
                                 ->afterStateUpdated(function ($state, Forms\Set $set) {
                                     if ($state) {
-                                        $course = Course::find($state);
-                                        if ($course && $course->vacancies_available <= 0) {
-                                            Notification::make()
-                                                ->danger()
-                                                ->title('Sem Vagas Disponíveis')
-                                                ->body("O curso '{$course->name}' atingiu o limite de vagas.")
-                                                ->persistent()
-                                                ->send();
-
-                                            $set('course_id', null);
+                                        $course = \App\Models\Course::find($state);
+                                        if ($course) {
+                                            $set('education_level', $course->education_level);
                                         }
                                     }
-                                })
-                                ->options(function () {
-                                    return Course::all()->mapWithKeys(function ($course) {
-                                        $available = $course->vacancies_available;
-                                        $suffix = $available > 0 ? " ({$available} vagas disponíveis)" : " (Sem vagas)";
-                                        return [$course->id => $course->name.$suffix];
-                                    });
-                                })
-                                ->helperText('Selecione o curso do estagiário'),
+                                }),
+
+                            Forms\Components\Select::make('education_level')
+                                ->label('Nível de Formação')
+                                ->options([
+                                    'postgraduate' => 'Pós-Graduação',
+                                    'higher_education' => 'Ensino Superior',
+                                    'technical' => 'Ensino Técnico',
+                                ])
+                                ->required()
+                                ->disabled()
+                                ->dehydrated(),
 
                             Forms\Components\Select::make('department_id')
                                 ->label('Setor')
@@ -156,15 +174,6 @@ class InternshipResource extends Resource
                                 ->searchable()
                                 ->preload()
                                 ->helperText('Instituição educacional responsável'),
-
-                            Forms\Components\Select::make('education_level')
-                                ->label('Nível de Formação')
-                                ->options([
-                                    'postgraduate' => 'Pós-Graduação',
-                                    'higher_education' => 'Ensino Superior',
-                                    'technical' => 'Ensino Técnico',
-                                ])
-                                ->required(),
                         ])->columns(2)
                 ])->columnSpanFull()
             ]);

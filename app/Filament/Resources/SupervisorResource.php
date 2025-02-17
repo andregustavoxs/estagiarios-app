@@ -26,6 +26,10 @@ class SupervisorResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Supervisores';
 
+    protected static ?string $navigationGroup = 'Cadastros Básicos';
+
+    protected static ?int $navigationSort = 2;
+
     public static function form(Form $form): Form
     {
         return $form

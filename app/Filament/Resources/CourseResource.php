@@ -29,6 +29,10 @@ class CourseResource extends Resource
 
     protected static ?string $slug = 'cursos';
 
+    protected static ?string $navigationGroup = 'Cadastros Básicos';
+
+    protected static ?int $navigationSort = 1;
+
     public static function getNavigationBadge(): ?string
     {
         $totalVacancies = Course::sum('vacancies');
@@ -88,6 +92,15 @@ class CourseResource extends Resource
                                             }
                                         }
                                     }),
+
+                                Forms\Components\Select::make('education_level')
+                                    ->label('Nível de Formação')
+                                    ->options([
+                                        'postgraduate' => 'Pós-Graduação',
+                                        'higher_education' => 'Ensino Superior',
+                                        'technical' => 'Ensino Técnico',
+                                    ])
+                                    ->required(),
                             ]),
                     ]),
             ]);

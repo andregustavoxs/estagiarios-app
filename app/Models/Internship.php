@@ -27,12 +27,16 @@ class Internship extends Model
         'end_date',
         'status',
         'education_level',
+        'schedule_start',
+        'schedule_end',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
         'status' => 'string',
+        'schedule_start' => 'datetime:H:i',
+        'schedule_end' => 'datetime:H:i',
     ];
 
     public function intern(): BelongsTo

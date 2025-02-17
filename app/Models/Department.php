@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Internship;
 use App\Models\Supervisor;
+use App\Models\Extension;
 
 class Department extends Model
 {
@@ -18,7 +19,6 @@ class Department extends Model
         'name',
         'acronym',
         'supervisor_id',
-        'extension',
     ];
     public function interns(): HasMany
     {
@@ -28,5 +28,10 @@ class Department extends Model
     public function supervisors(): HasMany
     {
         return $this->hasMany(Supervisor::class);
+    }
+
+    public function extensions(): HasMany
+    {
+        return $this->hasMany(Extension::class);
     }
 }
